@@ -1,11 +1,16 @@
 # AndroMCP
 
+**Your Android phone, controllable by AI — no ADB, no cable, no computer.**
+
 [![CI](https://github.com/cococopi/andromcp/actions/workflows/ci.yml/badge.svg)](https://github.com/cococopi/andromcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An Android application that runs as an **MCP (Model Context Protocol) server**, enabling AI models to **fully control an Android device** remotely using accessibility services and screenshot capture.
+AndroMCP runs an **MCP (Model Context Protocol) server on the phone itself**, enabling AI models to **fully control an Android device** through accessibility services and screenshot capture. Because the server lives on the device, the MCP endpoint is reachable over your LAN — or through a tunnel from anywhere in the world — with no ADB, no USB cable, and no computer sitting next to the phone.
 
-The app runs directly on your Android device (or emulator) and exposes an HTTP server (with optional HTTPS) implementing the MCP protocol. AI models like Claude can connect to it and interact with any app on the device — reading UI elements, tapping buttons, typing text, swiping, capturing screenshots, managing files, launching apps, and more.
+Once connected, an AI model can read UI elements, tap buttons, type text, swipe, capture screenshots, manage files, launch apps, and more, across any app on the device.
+
+**Built by [CocoCopi](https://cococopi.dpdns.org/)** — Kabilan and Vishal Chandrakanth.
+[Website](https://cococopi.dpdns.org/) · [X](https://x.com/Coco_Copi) · [Instagram](https://www.instagram.com/cococopidevelopers/) · [GitHub](https://github.com/cococopi/andromcp)
 
 > **Warning:** This software is provided "as-is" without warranty of any kind, for **research and educational purposes only**. The authors do not condone the use of this tool for any illegal, unauthorized, or unethical activities. Users are solely responsible for ensuring their use complies with all applicable laws and regulations. By using this software, you agree to use it responsibly and at your own risk.
 
@@ -22,6 +27,7 @@ The app runs directly on your Android device (or emulator) and exposes an HTTP s
 - [Permissions Reference](#permissions-reference)
 - [Security](#security)
 - [Contributing](#contributing)
+- [Built by CocoCopi](#built-by-cococopi)
 - [License](#license)
 
 ---
@@ -197,7 +203,7 @@ Add the server to your `.mcp.json` configuration file:
 ```json
 {
   "mcpServers": {
-    "android-phone": {
+    "andromcp": {
       "type": "http",
       "url": "http://DEVICE_IP:PORT/mcp",
       "headers": {
@@ -552,10 +558,23 @@ Storage locations are configured in Settings > Storage, which includes automatic
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for build requirements, testing, architecture, and development conventions.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for build requirements, testing, architecture, and development conventions. Bug reports and pull requests are welcome on [GitHub](https://github.com/cococopi/andromcp/issues).
+
+---
+
+## Built by CocoCopi
+
+AndroMCP is designed, built, and maintained by **CocoCopi** — **Kabilan** and **Vishal Chandrakanth**.
+
+- **Website** — [cococopi.dpdns.org](https://cococopi.dpdns.org/)
+- **X** — [@Coco_Copi](https://x.com/Coco_Copi)
+- **Instagram** — [@cococopidevelopers](https://www.instagram.com/cococopidevelopers/)
+- **GitHub** — [github.com/cococopi/andromcp](https://github.com/cococopi/andromcp)
+
+Questions, bug reports, or feature requests? Open an [issue](https://github.com/cococopi/andromcp/issues) or reach out on X.
 
 ---
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for details.
+AndroMCP is released under the **MIT License**. See [LICENSE.md](LICENSE.md) for the full text.

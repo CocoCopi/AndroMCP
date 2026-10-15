@@ -40,10 +40,11 @@
 
     <!-- About Screen -->
     <string name="about_author_section">Author</string>
-    <string name="about_author_name">cococopi</string>
-    <string name="about_author_email">cococopi@users.noreply.github.com</string>
-    <string name="about_author_linkedin">linkedin.com/in/cococopi</string>
-    <string name="about_author_x">x.com/cococopi</string>
+    <string name="about_author_name">CocoCopi</string>
+    <string name="about_author_names">Kabilan and Vishal Chandrakanth</string>
+    <string name="about_author_x">x.com/Coco_Copi</string>
+    <string name="about_author_instagram">instagram.com/cococopidevelopers</string>
+    <string name="about_author_website">cococopi.dpdns.org</string>
     <string name="about_links_section">Links</string>
     <string name="about_link_github">GitHub Repository</string>
     <string name="about_link_license">MIT License</string>

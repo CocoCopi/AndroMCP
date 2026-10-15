@@ -57,8 +57,9 @@ import com.cococopi.andromcp.ui.viewmodels.UpdateViewModel
 private const val GITHUB_URL = "https://github.com/cococopi/andromcp"
 private const val LICENSE_URL = "https://github.com/cococopi/andromcp/blob/main/LICENSE"
 private const val ISSUES_URL = "https://github.com/cococopi/andromcp/issues"
-private const val LINKEDIN_URL = "https://linkedin.com/in/cococopi"
-private const val X_URL = "https://x.com/cococopi"
+private const val X_URL = "https://x.com/Coco_Copi"
+private const val INSTAGRAM_URL = "https://www.instagram.com/cococopidevelopers/"
+private const val WEBSITE_URL = "https://cococopi.dpdns.org/"
 private const val DBIP_URL = "https://db-ip.com"
 private const val PRIVACY_MODEL_URL =
     "https://huggingface.co/ai4privacy/llama-ai4privacy-multilingual-categorical-anonymiser-openpii"
@@ -148,28 +149,9 @@ fun AboutScreen(
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = stringResource(R.string.about_author_email),
+                text = stringResource(R.string.about_author_names),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier =
-                    Modifier.clickable {
-                        val intent =
-                            Intent(Intent.ACTION_SENDTO).apply {
-                                data = Uri.parse("mailto:cococopi@users.noreply.github.com")
-                            }
-                        context.startActivity(intent)
-                    },
-            )
-            Spacer(Modifier.height(4.dp))
-
-            Text(
-                text = stringResource(R.string.about_author_linkedin),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier =
-                    Modifier.clickable {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(LINKEDIN_URL)))
-                    },
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(4.dp))
 
@@ -180,6 +162,28 @@ fun AboutScreen(
                 modifier =
                     Modifier.clickable {
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(X_URL)))
+                    },
+            )
+            Spacer(Modifier.height(4.dp))
+
+            Text(
+                text = stringResource(R.string.about_author_instagram),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier =
+                    Modifier.clickable {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(INSTAGRAM_URL)))
+                    },
+            )
+            Spacer(Modifier.height(4.dp))
+
+            Text(
+                text = stringResource(R.string.about_author_website),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier =
+                    Modifier.clickable {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(WEBSITE_URL)))
                     },
             )
 
