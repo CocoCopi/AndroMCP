@@ -32,6 +32,7 @@ import com.cococopi.andromcp.mcp.tools.ReferenceCountedToolCallIndicator
 import com.cococopi.andromcp.mcp.tools.ToolCallIndicator
 import com.cococopi.andromcp.mcp.tools.registerAppManagementTools
 import com.cococopi.andromcp.mcp.tools.registerCameraTools
+import com.cococopi.andromcp.mcp.tools.registerDeviceServiceTools
 import com.cococopi.andromcp.mcp.tools.registerFileTools
 import com.cococopi.andromcp.mcp.tools.registerGestureTools
 import com.cococopi.andromcp.mcp.tools.registerIntentTools
@@ -469,6 +470,7 @@ class McpServerService : Service() {
         )
         registerLocationTools(registrar, locationProvider, privacyToolGate, toolNamePrefix, perms)
         registerSharingBundle(registrar, toolNamePrefix, perms, fileSizeLimitMb)
+        registerDeviceServiceTools(registrar, applicationContext, intentDispatcher, toolNamePrefix, perms)
     }
 
     private fun registerAccessibilityToolBundle(

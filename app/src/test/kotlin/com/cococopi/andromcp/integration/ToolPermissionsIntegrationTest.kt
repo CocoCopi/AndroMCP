@@ -322,6 +322,16 @@ class ToolPermissionsIntegrationTest {
                 "get_location",
                 "get_shared_content",
                 "share_file_via_web",
+                "speak_text",
+                "get_volume",
+                "set_volume",
+                "media_control",
+                "get_battery_status",
+                "set_flashlight",
+                "get_device_info",
+                "set_alarm",
+                "set_timer",
+                "dial_number",
             )
     }
 }

@@ -84,6 +84,21 @@ private val ALL_TOOL_CATEGORIES: List<ToolCategory> =
             ),
         ),
         ToolCategory(
+            "Device Services",
+            listOf(
+                ToolEntry("speak_text", "Speak Text"),
+                ToolEntry("get_volume", "Get Volume"),
+                ToolEntry("set_volume", "Set Volume"),
+                ToolEntry("media_control", "Media Control"),
+                ToolEntry("get_battery_status", "Get Battery Status"),
+                ToolEntry("set_flashlight", "Set Flashlight"),
+                ToolEntry("get_device_info", "Get Device Info"),
+                ToolEntry("set_alarm", "Set Alarm"),
+                ToolEntry("set_timer", "Set Timer"),
+                ToolEntry("dial_number", "Dial Number"),
+            ),
+        ),
+        ToolCategory(
             "Touch",
             listOf(
                 ToolEntry("tap", "Tap"),

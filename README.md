@@ -43,9 +43,9 @@ Once connected, an AI model can read UI elements, tap buttons, type text, swipe,
 - Auto-start on boot
 - Remote access tunnels via Cloudflare Quick Tunnels or ngrok (public HTTPS URL)
 
-### 57 MCP Tools across 14 Categories
+### 67 MCP Tools across 15 Categories
 
-Screen introspection, system actions, touch actions, gestures, node actions, text input, utilities, file operations, app management, camera, intents, notifications, location, and sharing.
+Screen introspection, system actions, touch actions, gestures, node actions, text input, utilities, file operations, app management, camera, intents, notifications, location, sharing, and device services (text-to-speech, volume, media playback, battery, flashlight, device identity, alarms, timers, dialer).
 
 All tool names use the `andromcp_` prefix by default (e.g., `andromcp_tap`). When a device slug is configured (e.g., `pixel7`), the prefix becomes `andromcp_pixel7_` (e.g., `andromcp_pixel7_tap`).
 
@@ -66,7 +66,7 @@ See [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md) for the full tool reference with inpu
 
 | Feature | This project | [mobile-mcp] | [Android-MCP] | [android-mcp-server] | [adb-mcp] | [droidrun-mcp] |
 |---------|:-:|:-:|:-:|:-:|:-:|:-:|
-| MCP tools | 57 | 21 | 11 | 5 | 10 | 11 |
+| MCP tools | 67 | 21 | 11 | 5 | 10 | 11 |
 | Runs on the phone (no ADB) | :white_check_mark: | :x: | :x: | :x: | :x: | :x: |
 | Action latency | 10-100 ms | 1-4 s | 1-4 s | 1-4 s | 1-4 s | 1-4 s |
 | Works over the internet | :white_check_mark: | :x: | :x: | :x: | :x: | :x: |

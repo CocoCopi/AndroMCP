@@ -29,12 +29,13 @@ This document provides a comprehensive reference for all MCP tools available in 
 16. [Notification Tools](#12-notification-tools)
 17. [Location Tools](#13-location-tools)
 18. [Sharing Tools](#14-sharing-tools)
+19. [Device Services Tools](#15-device-services-tools)
 
 ---
 
 ## Overview
 
-The MCP server exposes 57 tools via the JSON-RPC 2.0 protocol, organized into 14 categories:
+The MCP server exposes 67 tools via the JSON-RPC 2.0 protocol, organized into 15 categories:
 
 | Category | Tools | Plan |
 |----------|-------|------|
@@ -52,6 +53,7 @@ The MCP server exposes 57 tools via the JSON-RPC 2.0 protocol, organized into 14
 | Notification | `andromcp_notification_list`, `andromcp_notification_open`, `andromcp_notification_dismiss`, `andromcp_notification_snooze`, `andromcp_notification_action`, `andromcp_notification_reply` | 32 |
 | Location | `andromcp_get_location` | 43 |
 | Sharing | `andromcp_get_shared_content`, `andromcp_share_file_via_web` | 48 |
+| Device Services | `andromcp_speak_text`, `andromcp_get_volume`, `andromcp_set_volume`, `andromcp_media_control`, `andromcp_get_battery_status`, `andromcp_set_flashlight`, `andromcp_get_device_info`, `andromcp_set_alarm`, `andromcp_set_timer`, `andromcp_dial_number` | - |
 
 ## Tool Naming Convention
 
@@ -3504,3 +3506,183 @@ Exposes an existing device file as a temporary capability URL. Use it to let an 
 
 - **Capability URLs are bearer links**: anyone holding the URL can fetch the file until it expires (1 hour). The random token is the only protection — treat returned URLs as sensitive.
 - **Privacy Mode**: when enabled, device-derived text (shared text, textual file contents, filenames) is redacted before being returned; inline images and served file bytes are not redacted.
+
+---
+
+## 15. Device Services Tools
+
+Device Services tools expose the phone's own hardware and system services to the AI: speaking aloud
+through the text-to-speech engine, reading and setting volume, controlling media playback, reading
+battery state and device identity, driving the torch, and delegating alarms, timers and dialling to
+the stock Clock and Dialer apps.
+
+**File**: `app/src/main/kotlin/.../mcp/tools/DeviceServiceTools.kt`
+**Service**: Android platform APIs, plus `IntentDispatcher` for Clock/Dialer delegation
+**Permission**: none — every tool in this category works without a runtime permission (the `ring`,
+`notification` and `alarm` volume streams may additionally require Do Not Disturb access on some
+devices, which surfaces as a permission error rather than a silent no-op)
+
+All ten tools are individually toggleable under **Settings → MCP Tools → Device Services**.
+
+### `andromcp_speak_text`
+
+Speaks text aloud on the device using the platform text-to-speech engine, so the phone can talk to
+whoever is holding it.
+
+**Parameters**:
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `text` | string | Yes | - | The text to speak aloud |
+| `interrupt` | boolean | No | `true` | If `true`, stop any speech already in progress; if `false`, queue this text behind it |
+| `timeout_ms` | integer | No | `60000` | Maximum time to wait for speech to finish (1-120000) |
+
+**Returns**: text confirmation, e.g. `Spoken 42 characters`.
+
+**Example Request**:
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "andromcp_speak_text",
+    "arguments": { "text": "Dinner is ready." }
+  }
+}
+```
+
+**Errors**: `ActionFailed` when no text-to-speech engine is available; `Timeout` when speech does
+not finish within `timeout_ms`.
+
+### `andromcp_get_volume`
+
+Reads the current volume of an audio stream.
+
+**Parameters**:
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `stream` | string | No | `music` | One of `music`, `ring`, `alarm`, `notification`, `system`, `voice_call` |
+
+**Returns**: JSON object with `stream`, `index`, `max_index`, `percent` (0-100) and `muted`.
+
+### `andromcp_set_volume`
+
+Sets the volume of an audio stream.
+
+**Parameters**:
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `level` | integer | Yes | - | Target volume as a percentage from 0 to 100 |
+| `stream` | string | No | `music` | One of `music`, `ring`, `alarm`, `notification`, `system`, `voice_call` |
+| `show_ui` | boolean | No | `false` | If `true`, show the system volume panel while changing the volume |
+
+**Returns**: text confirmation, e.g. `Set 'music' volume to 7/15 (50%)`.
+
+**Errors**: `PermissionDenied` when the device restricts the requested stream (the `ring`,
+`notification` and `alarm` streams may require Do Not Disturb access).
+
+### `andromcp_media_control`
+
+Controls playback on the phone by dispatching a media key event to the active media session, so it
+works regardless of which app owns playback.
+
+**Parameters**:
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `action` | string | Yes | - | One of `play`, `pause`, `play_pause`, `next`, `previous`, `stop`, `fast_forward`, `rewind` |
+
+**Returns**: text confirmation, e.g. `Dispatched media action 'play_pause'`.
+
+### `andromcp_get_battery_status`
+
+Reports battery state. Useful before long-running device work, or for an assistant answering
+"how much battery do I have?".
+
+**Parameters**: none.
+
+**Returns**: JSON object with:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `level_percent` | integer \| null | Battery level 0-100, or `null` if the device does not expose it |
+| `is_charging` | boolean | Whether the device is currently charging |
+
+### `andromcp_set_flashlight`
+
+Turns the device torch (camera flash) on or off.
+
+**Parameters**:
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `enabled` | boolean | Yes | - | `true` turns the torch on, `false` turns it off |
+
+**Returns**: text confirmation, e.g. `Flashlight on`.
+
+**Errors**: `ActionFailed` when the device has no camera with a flash unit, or the camera is in use
+by another app.
+
+### `andromcp_get_device_info`
+
+Reports device and Android build identity so a remote agent can adapt to the exact hardware it is
+driving.
+
+**Parameters**: none.
+
+**Returns**: JSON object with `manufacturer`, `brand`, `model`, `device`, `product`, `hardware`,
+`android_version`, `sdk_int` and `supported_abis`.
+
+### `andromcp_set_alarm`
+
+Creates an alarm in the device's Clock app.
+
+**Parameters**:
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `hour` | integer | Yes | - | Hour of the alarm in 24-hour time (0-23) |
+| `minutes` | integer | Yes | - | Minutes past the hour (0-59) |
+| `label` | string | No | - | Optional label shown with the alarm |
+| `skip_ui` | boolean | No | `true` | If `true`, create the alarm without opening the Clock app; if `false`, open it for confirmation |
+
+**Returns**: text confirmation, e.g. `Alarm set for 07:30`.
+
+**Errors**: `ActionFailed` when the device has no Clock app handling
+`android.intent.action.SET_ALARM`.
+
+### `andromcp_set_timer`
+
+Starts a countdown timer in the device's Clock app.
+
+**Parameters**:
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `seconds` | integer | Yes | - | Timer duration in seconds (1-86400) |
+| `label` | string | No | - | Optional label shown with the timer |
+| `skip_ui` | boolean | No | `true` | If `true`, start the timer without opening the Clock app; if `false`, open it for confirmation |
+
+**Returns**: text confirmation, e.g. `Timer set for 600s`.
+
+**Errors**: `ActionFailed` when the device has no Clock app handling
+`android.intent.action.SET_TIMER`.
+
+### `andromcp_dial_number`
+
+Opens the system dialer with a phone number pre-filled, ready for the user to start the call.
+
+**Parameters**:
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `number` | string | Yes | - | The phone number to pre-fill (digits plus `+`, `*`, `#`, `-` and spaces) |
+
+**Returns**: text confirmation, e.g. `Dialer opened with +15551234567`.
+
+> **Note**: this tool does **not** place the call by itself. Placing a call requires the `CALL_PHONE`
+> runtime permission, so the final tap stays with the user. This is deliberate: a remotely-driven
+> device should not be able to dial silently.
