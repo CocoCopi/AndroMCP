@@ -1,0 +1,16 @@
+{
+  "name": "andromcp",
+  "description": "AndroMCP plugin marketplace",
+  "owner": {
+    "name": "cococopi",
+    "email": "cococopi@users.noreply.github.com"
+  },
+  "plugins": [
+    {
+      "name": "andromcp",
+      "description": "Channel plugin for AndroMCP — receives device events and pushes them into Claude Code sessions.",
+      "source": "./channel-plugin",
+      "category": "productivity"
+    }
+  ]
+}

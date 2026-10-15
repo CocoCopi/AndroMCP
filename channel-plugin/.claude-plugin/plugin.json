@@ -1,0 +1,12 @@
+{
+  "name": "andromcp",
+  "description": "Channel plugin for AndroMCP — receives device events (notifications, WiFi, geofence) and pushes them into Claude Code sessions.",
+  "version": "0.0.1",
+  "keywords": ["android", "remote-control", "channel", "notifications", "geofence", "wifi"],
+  "mcpServers": {
+    "andromcp": {
+      "command": "bun",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/index.ts"]
+    }
+  }
+}
