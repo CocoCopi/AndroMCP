@@ -21,19 +21,17 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 
-/**
- * Device settings tool bundle.
- *
- * Lets an agent read and change the settings a person actually fiddles with: screen brightness,
- * the screen-off timeout, rotation lock, font size, ringer mode, Do Not Disturb and the airplane
- * mode state. It also ships `open_settings_screen`, which deep-links to any system settings page
- * by name, so an agent that hits a missing grant can take the user straight to the screen that
- * fixes it instead of describing where to tap.
- *
- * The two escalating grants this app cannot request at runtime — "Modify system settings" and
- * "Do Not Disturb access" — are checked before every write and produce an actionable permission
- * error naming the screen to open, rather than a silent no-op.
- */
+// Device settings tool bundle.
+//
+// Lets an agent read and change the settings a person actually fiddles with: screen brightness,
+// the screen-off timeout, rotation lock, font size, ringer mode, Do Not Disturb and the airplane
+// mode state. It also ships `open_settings_screen`, which deep-links to any system settings page
+// by name, so an agent that hits a missing grant can take the user straight to the screen that
+// fixes it instead of describing where to tap.
+//
+// The two escalating grants this app cannot request at runtime — "Modify system settings" and
+// "Do Not Disturb access" — are checked before every write and produce an actionable permission
+// error naming the screen to open, rather than a silent no-op.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // get_brightness

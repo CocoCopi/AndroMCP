@@ -22,21 +22,19 @@ import java.io.InputStream
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
-/**
- * Shell-level tool bundle: the escape hatch that turns "the tools I shipped" into "the whole
- * device".
- *
- * Everything else in this app is a narrow, purpose-built capability, which means any operation
- * nobody thought to wrap is impossible for the agent. These tools remove that ceiling: run any
- * command the app's own uid is allowed to run, run commands as root when the device is rooted,
- * inspect processes, dump system properties, read logcat and read arbitrary readable files. They
- * are the last resort rather than the first choice — a dedicated tool is still safer and gives
- * structured output — but they make the difference between a device an agent can partly drive and
- * a device it can fully operate.
- *
- * Output from these tools is device-controlled text, so every result is returned as untrusted
- * content and capped at [DeviceShell.MAX_OUTPUT_CHARS] characters.
- */
+// Shell-level tool bundle: the escape hatch that turns "the tools I shipped" into "the whole
+// device".
+//
+// Everything else in this app is a narrow, purpose-built capability, which means any operation
+// nobody thought to wrap is impossible for the agent. These tools remove that ceiling: run any
+// command the app's own uid is allowed to run, run commands as root when the device is rooted,
+// inspect processes, dump system properties, read logcat and read arbitrary readable files. They
+// are the last resort rather than the first choice — a dedicated tool is still safer and gives
+// structured output — but they make the difference between a device an agent can partly drive and
+// a device it can fully operate.
+//
+// Output from these tools is device-controlled text, so every result is returned as untrusted
+// content and capped at [DeviceShell.MAX_OUTPUT_CHARS] characters.
 
 /** Shared process-spawning helper for the shell and terminal bundles. */
 internal object DeviceShell {
@@ -401,7 +399,8 @@ class ListProcessesHandler(
                 }
             }
         val lines =
-            raw.lines()
+            raw
+                .lines()
                 .map { it.trimEnd() }
                 .filter { it.isNotBlank() }
                 .let { rows -> if (filter.isEmpty()) rows else rows.filter { it.lowercase().contains(filter) } }

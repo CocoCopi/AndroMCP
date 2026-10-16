@@ -26,19 +26,17 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
-/**
- * Workspace file-operations tool bundle.
- *
- * Gives an agent a real, writable scratch filesystem of its own: a directory it can create
- * folders in, copy, move, delete, stat, hash, search, zip and unzip, without ever touching the
- * user's personal storage and without holding a single storage permission. Everything is
- * confined to the app's own external files directory, so the files are also browsable by the
- * user through any file manager, which makes the results verifiable.
- *
- * Every path parameter is relative to that root and is resolved canonically, so a path such as
- * `../../etc/hosts` is rejected rather than followed. File contents read back are untrusted
- * external data and carry the anti-prompt-injection warning.
- */
+// Workspace file-operations tool bundle.
+//
+// Gives an agent a real, writable scratch filesystem of its own: a directory it can create
+// folders in, copy, move, delete, stat, hash, search, zip and unzip, without ever touching the
+// user's personal storage and without holding a single storage permission. Everything is
+// confined to the app's own external files directory, so the files are also browsable by the
+// user through any file manager, which makes the results verifiable.
+//
+// Every path parameter is relative to that root and is resolved canonically, so a path such as
+// `../../etc/hosts` is rejected rather than followed. File contents read back are untrusted
+// external data and carry the anti-prompt-injection warning.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // list_workspace_files
@@ -65,7 +63,9 @@ class ListWorkspaceFilesHandler(
                 val directory = Workspace.resolve(context, path)
                 requireDirectory(directory, path)
                 val entries =
-                    directory.listFiles().orEmpty()
+                    directory
+                        .listFiles()
+                        .orEmpty()
                         .sortedWith(compareBy<File> { !it.isDirectory }.thenBy { it.name.lowercase() })
                         .take(limit)
                 buildJsonObject {
@@ -665,7 +665,8 @@ class FindFilesHandler(
                 }
                 val matcher = globToRegex(pattern)
                 val matches =
-                    start.walkTopDown()
+                    start
+                        .walkTopDown()
                         .maxDepth(maxDepth)
                         .filter { it.isFile && matcher.matches(it.name) }
                         .take(limit)
@@ -762,7 +763,8 @@ class SearchInFilesHandler(
                     throw McpToolException.NodeNotFound("No workspace path exists at '$path'")
                 }
                 val wantedExtensions =
-                    extensions.split(",")
+                    extensions
+                        .split(",")
                         .map { it.trim().removePrefix(".").lowercase() }
                         .filter { it.isNotEmpty() }
                 val matches = collectMatches(start, query, wantedExtensions, caseSensitive, maxDepth, limit)
@@ -1480,7 +1482,11 @@ private fun relativeZipName(
     source: File,
 ): String {
     if (!source.isDirectory && entry == source) return source.name
-    return rootDirectory.toURI().relativize(entry.toURI()).path.ifEmpty { entry.name }
+    return rootDirectory
+        .toURI()
+        .relativize(entry.toURI())
+        .path
+        .ifEmpty { entry.name }
 }
 
 /** Extracts [source] into [destination], refusing entries that would escape it. */

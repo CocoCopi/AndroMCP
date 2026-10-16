@@ -33,18 +33,16 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.net.UnknownHostException
 
-/**
- * Network and connectivity tool bundle.
- *
- * Turns the phone into a network probe and an HTTP client the agent can drive: arbitrary REST
- * calls, connectivity and interface inspection, DNS resolution, reachability tests, TCP port
- * checks and Wi-Fi scanning. Nothing here shells out or needs root — every tool uses public
- * Android/Java networking APIs, and the Wi-Fi tools gate themselves on the location permission
- * Android requires before it will reveal network identifiers.
- *
- * Responses that describe the surrounding network (scan results, HTTP bodies, host names) are
- * external, untrusted input and are returned with the anti-prompt-injection warning.
- */
+// Network and connectivity tool bundle.
+//
+// Turns the phone into a network probe and an HTTP client the agent can drive: arbitrary REST
+// calls, connectivity and interface inspection, DNS resolution, reachability tests, TCP port
+// checks and Wi-Fi scanning. Nothing here shells out or needs root — every tool uses public
+// Android/Java networking APIs, and the Wi-Fi tools gate themselves on the location permission
+// Android requires before it will reveal network identifiers.
+//
+// Responses that describe the surrounding network (scan results, HTTP bodies, host names) are
+// external, untrusted input and are returned with the anti-prompt-injection warning.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // http_request
@@ -1030,8 +1028,7 @@ private fun transportLabel(capabilities: NetworkCapabilities?): String =
     }
 
 /** Formats a raw MAC address, or null when the interface does not expose one. */
-private fun formatMac(address: ByteArray?): String? =
-    address?.joinToString(":") { byte -> "%02X".format(byte) }
+private fun formatMac(address: ByteArray?): String? = address?.joinToString(":") { byte -> "%02X".format(byte) }
 
 private const val SCHEME_HTTP = "http"
 private const val SCHEME_HTTPS = "https"

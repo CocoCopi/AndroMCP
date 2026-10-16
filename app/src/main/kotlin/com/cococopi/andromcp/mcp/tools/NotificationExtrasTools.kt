@@ -26,20 +26,18 @@ import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 import kotlin.random.Random
 
-/**
- * Notification tool bundle for the app's own notifications.
- *
- * The screen is not always the right place for an answer. A notification survives leaving the app,
- * shows up on a watch and on the lock screen, and can carry a title, body and priority that the user
- * reads at a glance — which makes it the right channel for a long task finishing, a reminder, or a
- * result worth keeping. These tools post, cancel and manage notifications on behalf of this app,
- * and let an agent inspect and shape the channels they arrive through.
- *
- * Posting needs the `POST_NOTIFICATIONS` grant on Android 13+, and the user can switch any channel
- * off afterwards; both are reported rather than assumed. Only this app's own notifications can be
- * posted or cancelled — other apps' notifications are read-only through the notification-listener
- * tools.
- */
+// Notification tool bundle for the app's own notifications.
+//
+// The screen is not always the right place for an answer. A notification survives leaving the app,
+// shows up on a watch and on the lock screen, and can carry a title, body and priority that the user
+// reads at a glance — which makes it the right channel for a long task finishing, a reminder, or a
+// result worth keeping. These tools post, cancel and manage notifications on behalf of this app,
+// and let an agent inspect and shape the channels they arrive through.
+//
+// Posting needs the `POST_NOTIFICATIONS` grant on Android 13+, and the user can switch any channel
+// off afterwards; both are reported rather than assumed. Only this app's own notifications can be
+// posted or cancelled — other apps' notifications are read-only through the notification-listener
+// tools.
 
 /** Channel used when a caller does not name one. */
 private const val DEFAULT_CHANNEL_ID = "andromcp_agent"

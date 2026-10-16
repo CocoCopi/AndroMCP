@@ -28,19 +28,17 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.log10
 
-/**
- * Audio-capture tool bundle.
- *
- * Hearing is the half of the device an agent normally has no access to. These tools capture it:
- * record a meeting or a voice memo straight to a file, watch the current noise floor to decide
- * whether the room is quiet enough for speech, inspect which microphones the device actually
- * exposes, and clean up recordings afterwards.
- *
- * Recording goes to this app's own external files directory, so it needs no storage permission and
- * nothing is left behind in the user's library unless the agent explicitly moves or scans it.
- * Capture needs the `RECORD_AUDIO` runtime permission, which every tool checks before using the
- * microphone and names in its error when it is missing.
- */
+// Audio-capture tool bundle.
+//
+// Hearing is the half of the device an agent normally has no access to. These tools capture it:
+// record a meeting or a voice memo straight to a file, watch the current noise floor to decide
+// whether the room is quiet enough for speech, inspect which microphones the device actually
+// exposes, and clean up recordings afterwards.
+//
+// Recording goes to this app's own external files directory, so it needs no storage permission and
+// nothing is left behind in the user's library unless the agent explicitly moves or scans it.
+// Capture needs the `RECORD_AUDIO` runtime permission, which every tool checks before using the
+// microphone and names in its error when it is missing.
 
 /** Directory that holds recordings produced by this bundle. */
 private fun recordingDirectory(context: Context): File {
@@ -480,8 +478,10 @@ class MeasureNoiseLevelHandler(
 ) {
     @Suppress("TooGenericExceptionCaught")
     suspend fun execute(arguments: JsonObject?): CallToolResult {
-        val durationMs = McpToolUtils.optionalInt(arguments, "duration_ms", DEFAULT_DURATION_MS)
-            .coerceIn(MIN_DURATION_MS, MAX_DURATION_MS)
+        val durationMs =
+            McpToolUtils
+                .optionalInt(arguments, "duration_ms", DEFAULT_DURATION_MS)
+                .coerceIn(MIN_DURATION_MS, MAX_DURATION_MS)
         RuntimePermissionGate.require(context, Manifest.permission.RECORD_AUDIO, TOOL_NAME)
         Log.d(TAG, "Executing measure_noise_level")
 
@@ -636,10 +636,12 @@ class GetMicrophoneInfoHandler(
 ) {
     suspend fun execute(arguments: JsonObject?): CallToolResult {
         Log.d(TAG, "Executing get_microphone_info")
-        val audio = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
-            ?: throw McpToolException.ActionFailed("The audio service is unavailable on this device.")
+        val audio =
+            context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+                ?: throw McpToolException.ActionFailed("The audio service is unavailable on this device.")
         val inputs =
-            audio.getDevices(AudioManager.GET_DEVICES_INPUTS)
+            audio
+                .getDevices(AudioManager.GET_DEVICES_INPUTS)
                 .filter { it.type != AudioDeviceInfo.TYPE_UNKNOWN }
         val json =
             buildJsonObject {

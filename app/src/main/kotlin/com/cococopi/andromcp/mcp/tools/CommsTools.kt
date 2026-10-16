@@ -31,18 +31,16 @@ import java.time.Instant
 import java.time.format.DateTimeParseException
 import java.util.TimeZone
 
-/**
- * Communication and personal-data tool bundle.
- *
- * Gives an agent access to the account data a phone actually holds: text messages, the call log,
- * contacts and calendar events, plus sending a text message or handing a pre-filled e-mail to a
- * mail client. Every tool here touches a runtime-permission-protected provider, so each one gates
- * itself through [RuntimePermissionGate] and fails with an actionable permission error instead of
- * silently returning nothing.
- *
- * All content returned by these tools is device-derived and therefore wrapped with the
- * anti-prompt-injection warning.
- */
+// Communication and personal-data tool bundle.
+//
+// Gives an agent access to the account data a phone actually holds: text messages, the call log,
+// contacts and calendar events, plus sending a text message or handing a pre-filled e-mail to a
+// mail client. Every tool here touches a runtime-permission-protected provider, so each one gates
+// itself through [RuntimePermissionGate] and fails with an actionable permission error instead of
+// silently returning nothing.
+//
+// All content returned by these tools is device-derived and therefore wrapped with the
+// anti-prompt-injection warning.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // send_sms
@@ -908,42 +906,43 @@ class CreateContactHandler(
             withContext(Dispatchers.IO) {
                 val operations = arrayListOf<ContentProviderOperation>()
                 operations.add(
-                    ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                    ContentProviderOperation
+                        .newInsert(ContactsContract.RawContacts.CONTENT_URI)
                         .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
                         .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
                         .build(),
                 )
                 operations.add(
-                    ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                    ContentProviderOperation
+                        .newInsert(ContactsContract.Data.CONTENT_URI)
                         .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
                         .withValue(
                             ContactsContract.Data.MIMETYPE,
                             ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE,
-                        )
-                        .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name)
+                        ).withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name)
                         .build(),
                 )
                 if (phone.isNotEmpty()) {
                     operations.add(
-                        ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        ContentProviderOperation
+                            .newInsert(ContactsContract.Data.CONTENT_URI)
                             .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
                             .withValue(
                                 ContactsContract.Data.MIMETYPE,
                                 ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
-                            )
-                            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
+                            ).withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
                             .build(),
                     )
                 }
                 if (email.isNotEmpty()) {
                     operations.add(
-                        ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        ContentProviderOperation
+                            .newInsert(ContactsContract.Data.CONTENT_URI)
                             .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
                             .withValue(
                                 ContactsContract.Data.MIMETYPE,
                                 ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE,
-                            )
-                            .withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, email)
+                            ).withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, email)
                             .build(),
                     )
                 }

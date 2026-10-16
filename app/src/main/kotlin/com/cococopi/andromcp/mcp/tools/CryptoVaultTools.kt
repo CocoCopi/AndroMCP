@@ -35,19 +35,17 @@ import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 import kotlin.math.ln
 
-/**
- * Cryptography and secret-storage tool bundle.
- *
- * An agent that handles credentials, tokens or personal text needs somewhere safe to put them, and
- * a way to prove it produced the bytes it claims. These tools cover both: generate and manage keys
- * in the hardware-backed Android KeyStore, sign and verify data, encrypt or decrypt text either
- * with a device-held key or with a caller-supplied passphrase, and keep named secrets at rest
- * through the same KeyStore key. Passwords can be generated and their strength estimated.
- *
- * Nothing here needs a permission and nothing leaves the device. Private key material is generated
- * inside the KeyStore and can never be exported, so keystore_sign works precisely because the key
- * never has to leave that boundary.
- */
+// Cryptography and secret-storage tool bundle.
+//
+// An agent that handles credentials, tokens or personal text needs somewhere safe to put them, and
+// a way to prove it produced the bytes it claims. These tools cover both: generate and manage keys
+// in the hardware-backed Android KeyStore, sign and verify data, encrypt or decrypt text either
+// with a device-held key or with a caller-supplied passphrase, and keep named secrets at rest
+// through the same KeyStore key. Passwords can be generated and their strength estimated.
+//
+// Nothing here needs a permission and nothing leaves the device. Private key material is generated
+// inside the KeyStore and can never be exported, so keystore_sign works precisely because the key
+// never has to leave that boundary.
 
 /** Base64 output without line wrapping, so a payload survives a single-line JSON field. */
 private const val BASE64_FLAGS = Base64.NO_WRAP
@@ -56,7 +54,9 @@ private const val BASE64_FLAGS = Base64.NO_WRAP
 private fun signatureAlgorithmFor(keyAlgorithm: String): String =
     when (keyAlgorithm.uppercase()) {
         "RSA" -> "SHA256withRSA"
+
         "EC", "ECDSA" -> "SHA256withECDSA"
+
         else -> throw McpToolException.InvalidParams(
             "Keys of type '$keyAlgorithm' cannot sign. Generate an RSA or EC key with keystore_generate_key.",
         )
@@ -98,7 +98,10 @@ internal object CryptoVault {
     fun encode(bytes: ByteArray): String = Base64.encodeToString(bytes, BASE64_FLAGS)
 
     /** Decodes base64 produced by [encode]; rejects malformed input with a clear message. */
-    fun decode(text: String, field: String): ByteArray =
+    fun decode(
+        text: String,
+        field: String,
+    ): ByteArray =
         try {
             Base64.decode(text, BASE64_FLAGS)
         } catch (_: IllegalArgumentException) {
@@ -113,7 +116,9 @@ internal object CryptoVault {
     ): ByteArray =
         when (encoding.lowercase()) {
             "utf8", "text" -> content.toByteArray(Charsets.UTF_8)
+
             "base64" -> decode(content, field)
+
             else -> throw McpToolException.InvalidParams(
                 "Parameter 'input_encoding' must be utf8 or base64. Got '$encoding'.",
             )
@@ -366,11 +371,16 @@ class DecryptTextHandler(
                         CryptoVault.decryptWithPassphrase(passphrase, payload)
                     }
 
-                    KEYSTORE_PREFIX -> CryptoVault.decryptWithKeyStore(payload)
-                    else -> throw McpToolException.InvalidParams(
-                        "Unrecognized payload prefix '$mode'. Expected 'key:' or 'v1:' as produced by " +
-                            "encrypt_text.",
-                    )
+                    KEYSTORE_PREFIX -> {
+                        CryptoVault.decryptWithKeyStore(payload)
+                    }
+
+                    else -> {
+                        throw McpToolException.InvalidParams(
+                            "Unrecognized payload prefix '$mode'. Expected 'key:' or 'v1:' as produced by " +
+                                "encrypt_text.",
+                        )
+                    }
                 }
             }
         val json =
@@ -486,9 +496,11 @@ class KeystoreGenerateKeyHandler(
                             "$algorithm-256"
                         }
 
-                        else -> throw McpToolException.InvalidParams(
-                            "Parameter 'algorithm' must be RSA, EC or AES. Got '$algorithm'.",
-                        )
+                        else -> {
+                            throw McpToolException.InvalidParams(
+                                "Parameter 'algorithm' must be RSA, EC or AES. Got '$algorithm'.",
+                            )
+                        }
                     }
                 } catch (exception: IllegalArgumentException) {
                     throw McpToolException.InvalidParams(exception.message ?: "Invalid key parameters.")

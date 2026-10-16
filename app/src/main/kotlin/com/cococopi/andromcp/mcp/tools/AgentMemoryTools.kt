@@ -18,19 +18,17 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 
-/**
- * Persistent memory tool bundle.
- *
- * A tool call is stateless: whatever the agent learned — a package name, a half-finished checklist,
- * a preference the user stated, the fact that the third button opens the right dialog — is gone
- * when the call returns. That works for one-shot tasks and fails for everything longer. These tools
- * give the agent somewhere to write it down, on the device, surviving both the call and a restart of
- * the server.
- *
- * Entries are grouped into namespaces so unrelated tasks do not collide, and values are plain text
- * of bounded size, which keeps the store inspectable with the same tools that wrote it. Secrets do
- * not belong here: use secret_store, which keeps them encrypted.
- */
+// Persistent memory tool bundle.
+//
+// A tool call is stateless: whatever the agent learned — a package name, a half-finished checklist,
+// a preference the user stated, the fact that the third button opens the right dialog — is gone
+// when the call returns. That works for one-shot tasks and fails for everything longer. These tools
+// give the agent somewhere to write it down, on the device, surviving both the call and a restart of
+// the server.
+//
+// Entries are grouped into namespaces so unrelated tasks do not collide, and values are plain text
+// of bounded size, which keeps the store inspectable with the same tools that wrote it. Secrets do
+// not belong here: use secret_store, which keeps them encrypted.
 
 /** Size ceiling for a single remembered value. */
 private const val MAX_VALUE_CHARS = 64_000
@@ -104,8 +102,7 @@ internal object AgentMemory {
     }
 
     /** Splits a stored key into namespace and name. */
-    fun splitKey(combined: String): Pair<String, String> =
-        combined.substringBefore("::") to combined.substringAfter("::", "")
+    fun splitKey(combined: String): Pair<String, String> = combined.substringBefore("::") to combined.substringAfter("::", "")
 
     /** Normalises a caller-supplied namespace. */
     fun namespaceOf(raw: String): String = raw.trim().ifEmpty { DEFAULT_NAMESPACE }
@@ -222,11 +219,12 @@ class MemoryGetHandler(
         val namespace = AgentMemory.namespaceOf(McpToolUtils.optionalString(arguments, "namespace", ""))
         Log.d(TAG, "Executing memory_get")
 
-        val entry = AgentMemory.meta(AgentMemory.prefs(context), namespace, key)
-            ?: throw McpToolException.InvalidParams(
-                "No memory entry '$key' in namespace '$namespace'. Call memory_list or memory_search to " +
-                    "see what is stored.",
-            )
+        val entry =
+            AgentMemory.meta(AgentMemory.prefs(context), namespace, key)
+                ?: throw McpToolException.InvalidParams(
+                    "No memory entry '$key' in namespace '$namespace'. Call memory_list or memory_search to " +
+                        "see what is stored.",
+                )
         return McpToolUtils.textResult(entry.toString())
     }
 

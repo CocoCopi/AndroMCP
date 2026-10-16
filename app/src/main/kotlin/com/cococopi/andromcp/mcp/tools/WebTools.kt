@@ -28,20 +28,18 @@ import java.net.URI
 import java.net.UnknownHostException
 import java.util.Locale
 
-/**
- * Web-content tool bundle.
- *
- * `http_request` fetches a URL and hands back raw bytes; these tools turn the web into something an
- * agent can actually read and use. `fetch_webpage` renders a page as text with its title, stripping
- * scripts, styles and markup so the content is not buried in HTML. `extract_links` pulls the links
- * out so the agent can navigate. `get_rss_feed` turns a feed into a headline list,
- * `get_weather` answers a question with real forecast data (no API key, via Open-Meteo),
- * `check_url_status` verifies a URL cheaply, `fetch_json` grabs an API response, and
- * `download_to_workspace` stores a file where other tools can pick it up.
- *
- * Everything is read-only on the device and needs only the internet permission. Content comes from
- * the network, so it is always returned as untrusted.
- */
+// Web-content tool bundle.
+//
+// `http_request` fetches a URL and hands back raw bytes; these tools turn the web into something an
+// agent can actually read and use. `fetch_webpage` renders a page as text with its title, stripping
+// scripts, styles and markup so the content is not buried in HTML. `extract_links` pulls the links
+// out so the agent can navigate. `get_rss_feed` turns a feed into a headline list,
+// `get_weather` answers a question with real forecast data (no API key, via Open-Meteo),
+// `check_url_status` verifies a URL cheaply, `fetch_json` grabs an API response, and
+// `download_to_workspace` stores a file where other tools can pick it up.
+//
+// Everything is read-only on the device and needs only the internet permission. Content comes from
+// the network, so it is always returned as untrusted.
 
 /** A fetched HTTP resource, already decoded as text. */
 private data class FetchedResource(
@@ -172,7 +170,12 @@ private object WebClient {
 
     /** Extracts the `<title>` of an HTML document, if it has one. */
     fun titleOf(html: String): String =
-        TITLE_PATTERN.find(html)?.groupValues?.get(1)?.let { decodeEntities(it.trim()) }.orEmpty()
+        TITLE_PATTERN
+            .find(html)
+            ?.groupValues
+            ?.get(1)
+            ?.let { decodeEntities(it.trim()) }
+            .orEmpty()
 
     /** Turns HTML into readable text: scripts, styles and markup removed, entities decoded. */
     fun toText(html: String): String {
@@ -257,7 +260,8 @@ class FetchWebpageHandler(
         val maxChars = McpToolUtils.optionalInt(arguments, "max_chars", DEFAULT_MAX_CHARS).coerceIn(500, MAX_MAX_CHARS)
         val includeHtml = McpToolUtils.optionalBoolean(arguments, "include_html", false)
         val timeoutMs =
-            McpToolUtils.optionalInt(arguments, "timeout_seconds", DEFAULT_TIMEOUT_SECONDS)
+            McpToolUtils
+                .optionalInt(arguments, "timeout_seconds", DEFAULT_TIMEOUT_SECONDS)
                 .coerceIn(1, MAX_TIMEOUT_SECONDS) * 1000
         Log.d(TAG, "Executing fetch_webpage")
 
@@ -452,9 +456,10 @@ class FetchJsonHandler(
         val parsed =
             runCatching { Json.parseToJsonElement(resource.body) }.getOrNull()
         val topLevelKeys =
-            parsed?.let { element ->
-                runCatching { element.jsonObject.keys.toList() }.getOrNull()
-            }.orEmpty()
+            parsed
+                ?.let { element ->
+                    runCatching { element.jsonObject.keys.toList() }.getOrNull()
+                }.orEmpty()
         val json =
             buildJsonObject {
                 put("url", resource.finalUrl)
@@ -653,7 +658,12 @@ class GetRssFeedHandler(
         tag: String,
     ): String {
         val match = Regex("<$tag[^>]*>(.*?)</$tag>", HTML_FLAGS).find(item)
-        val raw = match?.groupValues?.get(1)?.trim().orEmpty()
+        val raw =
+            match
+                ?.groupValues
+                ?.get(1)
+                ?.trim()
+                .orEmpty()
         return WebClient.decodeEntities(raw)
     }
 
@@ -666,7 +676,13 @@ class GetRssFeedHandler(
 
     /** Channel-level title of the feed. */
     private fun feedTitle(xml: String): String {
-        val channel = CHANNEL_TITLE_PATTERN.find(xml)?.groupValues?.get(1)?.trim().orEmpty()
+        val channel =
+            CHANNEL_TITLE_PATTERN
+                .find(xml)
+                ?.groupValues
+                ?.get(1)
+                ?.trim()
+                .orEmpty()
         return WebClient.decodeEntities(channel)
     }
 
@@ -738,12 +754,52 @@ class GetWeatherHandler(
             buildJsonObject {
                 put("resolved_location", place)
                 putJsonObject("current") {
-                    put("temperature_c", current?.get("temperature_2m")?.jsonPrimitive?.content.orEmpty())
-                    put("feels_like_c", current?.get("apparent_temperature")?.jsonPrimitive?.content.orEmpty())
-                    put("humidity_percent", current?.get("relative_humidity_2m")?.jsonPrimitive?.content.orEmpty())
-                    put("precipitation_mm", current?.get("precipitation")?.jsonPrimitive?.content.orEmpty())
-                    put("wind_speed_kmh", current?.get("wind_speed_10m")?.jsonPrimitive?.content.orEmpty())
-                    val code = current?.get("weather_code")?.jsonPrimitive?.content?.toIntOrNull()
+                    put(
+                        "temperature_c",
+                        current
+                            ?.get("temperature_2m")
+                            ?.jsonPrimitive
+                            ?.content
+                            .orEmpty(),
+                    )
+                    put(
+                        "feels_like_c",
+                        current
+                            ?.get("apparent_temperature")
+                            ?.jsonPrimitive
+                            ?.content
+                            .orEmpty(),
+                    )
+                    put(
+                        "humidity_percent",
+                        current
+                            ?.get("relative_humidity_2m")
+                            ?.jsonPrimitive
+                            ?.content
+                            .orEmpty(),
+                    )
+                    put(
+                        "precipitation_mm",
+                        current
+                            ?.get("precipitation")
+                            ?.jsonPrimitive
+                            ?.content
+                            .orEmpty(),
+                    )
+                    put(
+                        "wind_speed_kmh",
+                        current
+                            ?.get("wind_speed_10m")
+                            ?.jsonPrimitive
+                            ?.content
+                            .orEmpty(),
+                    )
+                    val code =
+                        current
+                            ?.get("weather_code")
+                            ?.jsonPrimitive
+                            ?.content
+                            ?.toIntOrNull()
                     put("condition", weatherCodeName(code))
                 }
                 putJsonArray("daily") {
@@ -759,10 +815,36 @@ class GetWeatherHandler(
                         add(
                             buildJsonObject {
                                 put("date", date.jsonPrimitive.content)
-                                put("high_c", highs.getOrNull(index)?.jsonPrimitive?.content.orEmpty())
-                                put("low_c", lows.getOrNull(index)?.jsonPrimitive?.content.orEmpty())
-                                put("rain_probability_percent", rain.getOrNull(index)?.jsonPrimitive?.content.orEmpty())
-                                val dayCode = codes.getOrNull(index)?.jsonPrimitive?.content?.toIntOrNull()
+                                put(
+                                    "high_c",
+                                    highs
+                                        .getOrNull(index)
+                                        ?.jsonPrimitive
+                                        ?.content
+                                        .orEmpty(),
+                                )
+                                put(
+                                    "low_c",
+                                    lows
+                                        .getOrNull(index)
+                                        ?.jsonPrimitive
+                                        ?.content
+                                        .orEmpty(),
+                                )
+                                put(
+                                    "rain_probability_percent",
+                                    rain
+                                        .getOrNull(index)
+                                        ?.jsonPrimitive
+                                        ?.content
+                                        .orEmpty(),
+                                )
+                                val dayCode =
+                                    codes
+                                        .getOrNull(index)
+                                        ?.jsonPrimitive
+                                        ?.content
+                                        ?.toIntOrNull()
                                 put("condition", weatherCodeName(dayCode))
                             },
                         )
@@ -781,11 +863,12 @@ class GetWeatherHandler(
             runCatching {
                 Json.parseToJsonElement(resource.body).jsonObject["results"]?.jsonArray
             }.getOrNull()
-        val first = results?.firstOrNull()?.jsonObject
-            ?: throw McpToolException.InvalidParams(
-                "Could not find a place called '$location'. Try a larger nearby city, or pass " +
-                    "'latitude' and 'longitude' directly.",
-            )
+        val first =
+            results?.firstOrNull()?.jsonObject
+                ?: throw McpToolException.InvalidParams(
+                    "Could not find a place called '$location'. Try a larger nearby city, or pass " +
+                        "'latitude' and 'longitude' directly.",
+                )
         return buildJsonObject {
             put("name", first["name"]?.jsonPrimitive?.content.orEmpty())
             put("country", first["country"]?.jsonPrimitive?.content.orEmpty())
@@ -959,8 +1042,11 @@ class DownloadToWorkspaceHandler(
                 put("path", target.absolutePath)
                 put("file_name", target.name)
                 put("size_bytes", written)
-                put("note", "Read it with shell_exec or read_workspace_file, and install it with install_apk " +
-                    "when it is an APK.")
+                put(
+                    "note",
+                    "Read it with shell_exec or read_workspace_file, and install it with install_apk " +
+                        "when it is an APK.",
+                )
             }
         return McpToolUtils.textResult(json.toString())
     }

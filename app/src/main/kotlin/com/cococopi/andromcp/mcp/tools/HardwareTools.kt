@@ -46,17 +46,15 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 
-/**
- * Hardware and sensor tool bundle.
- *
- * Exposes the physical side of the phone to an agent: the sensor suite, battery and thermal
- * state, memory and storage pressure, CPU identity, vibration, the NFC and Bluetooth radios, the
- * display geometry and the current audio routing. These are the readings an agent needs to reason
- * about what the device is physically doing before it decides to act.
- *
- * Everything here uses public framework APIs. Only the Bluetooth tools and body-sensor reads are
- * permission-gated, and they gate themselves at call time with an actionable error.
- */
+// Hardware and sensor tool bundle.
+//
+// Exposes the physical side of the phone to an agent: the sensor suite, battery and thermal
+// state, memory and storage pressure, CPU identity, vibration, the NFC and Bluetooth radios, the
+// display geometry and the current audio routing. These are the readings an agent needs to reason
+// about what the device is physically doing before it decides to act.
+//
+// Everything here uses public framework APIs. Only the Bluetooth tools and body-sensor reads are
+// permission-gated, and they gate themselves at call time with an actionable error.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // list_sensors

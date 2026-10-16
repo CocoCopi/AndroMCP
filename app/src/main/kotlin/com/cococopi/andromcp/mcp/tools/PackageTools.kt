@@ -35,20 +35,18 @@ import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 
-/**
- * Package and app-management tool bundle.
- *
- * The launcher sees a handful of icons; the package manager sees every app, service, permission and
- * signature on the device. These tools expose that view: enumerate and search installed apps,
- * inspect one in depth, list what it declares and what it may actually do, hash its signing
- * certificate, read its usage statistics, launch it, stop it, open its settings page, uninstall it
- * and install an APK that the agent built or downloaded.
- *
- * `QUERY_ALL_PACKAGES` is already declared, so the inventory is complete on Android 13+. Usage
- * statistics are gated behind the separate "Usage access" grant, which the tool explains when it is
- * missing, and installing an APK needs the user's one-time "install unknown apps" approval plus the
- * system confirmation dialog — both of which the tools report honestly rather than hiding.
- */
+// Package and app-management tool bundle.
+//
+// The launcher sees a handful of icons; the package manager sees every app, service, permission and
+// signature on the device. These tools expose that view: enumerate and search installed apps,
+// inspect one in depth, list what it declares and what it may actually do, hash its signing
+// certificate, read its usage statistics, launch it, stop it, open its settings page, uninstall it
+// and install an APK that the agent built or downloaded.
+//
+// `QUERY_ALL_PACKAGES` is already declared, so the inventory is complete on Android 13+. Usage
+// statistics are gated behind the separate "Usage access" grant, which the tool explains when it is
+// missing, and installing an APK needs the user's one-time "install unknown apps" approval plus the
+// system confirmation dialog — both of which the tools report honestly rather than hiding.
 
 /** Row shape shared by the app listings. */
 private fun appRow(
@@ -85,7 +83,8 @@ private fun digestHex(
  */
 private fun x509CertificateOf(signature: Signature): X509Certificate? =
     try {
-        CertificateFactory.getInstance("X.509")
+        CertificateFactory
+            .getInstance("X.509")
             .generateCertificate(ByteArrayInputStream(signature.toByteArray())) as? X509Certificate
     } catch (_: CertificateException) {
         null
@@ -493,8 +492,13 @@ class GetAppComponentsHandler(
                     throw McpToolException.InvalidParams("App '$packageName' is not installed.")
                 }
             }
+
         fun names(components: Array<out android.content.pm.ComponentInfo>?): List<String> =
-            components.orEmpty().map { it.name }.sorted().take(limit)
+            components
+                .orEmpty()
+                .map { it.name }
+                .sorted()
+                .take(limit)
         val json =
             buildJsonObject {
                 put("package_name", packageName)
@@ -655,8 +659,9 @@ class GetAppUsageStatsHandler(
         val limit = McpToolUtils.optionalInt(arguments, "limit", DEFAULT_LIMIT).coerceIn(1, MAX_LIMIT)
         Log.d(TAG, "Executing get_app_usage_stats")
 
-        val manager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
-            ?: throw McpToolException.ActionFailed("The usage-statistics service is unavailable on this device.")
+        val manager =
+            context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+                ?: throw McpToolException.ActionFailed("The usage-statistics service is unavailable on this device.")
         val end = System.currentTimeMillis()
         val begin = end - days.toLong() * MILLIS_PER_DAY
         val rows =
@@ -844,9 +849,12 @@ class ForceStopAppHandler(
             buildJsonObject {
                 put("package_name", packageName)
                 put("stop_requested", true)
-                put("note", "Background processes were killed. On Android 13+ the app may be restarted " +
-                    "by the system if it holds a foreground service; su_exec with `am force-stop` is " +
-                    "the harder stop.")
+                put(
+                    "note",
+                    "Background processes were killed. On Android 13+ the app may be restarted " +
+                        "by the system if it holds a foreground service; su_exec with `am force-stop` is " +
+                        "the harder stop.",
+                )
             }
         return McpToolUtils.textResult(json.toString())
     }
@@ -1240,9 +1248,10 @@ class QueryIntentHandlersHandler(
                             put("activity", activity.name)
                             put(
                                 "label",
-                                activity.applicationInfo?.let {
-                                    context.packageManager.getApplicationLabel(it).toString()
-                                }.orEmpty(),
+                                activity.applicationInfo
+                                    ?.let {
+                                        context.packageManager.getApplicationLabel(it).toString()
+                                    }.orEmpty(),
                             )
                             put(
                                 "is_default",

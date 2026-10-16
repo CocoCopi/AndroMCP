@@ -26,20 +26,18 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 
-/**
- * Media-library and playback tool bundle.
- *
- * Everything in the media library — photos, videos, recordings, podcasts — is indexed by
- * [MediaStore], which is a far better handle than a filesystem path: an entry has a stable id, a
- * MIME type, dimensions, duration and a bucket, and the same entry is addressable as a `content://`
- * URI that other apps accept. These tools let an agent browse, search, inspect, delete, rescan and
- * play media by id, and control playback and per-stream volume.
- *
- * Reading requires the matching Android 13+ media permission (`READ_MEDIA_IMAGES` /
- * `READ_MEDIA_VIDEO` / `READ_MEDIA_AUDIO`); each tool reports the exact missing permission instead
- * of failing silently. Changing media uses adaptive permissions, so deleting an item another app
- * owns needs the user's confirmation and reports an actionable error when that is required.
- */
+// Media-library and playback tool bundle.
+//
+// Everything in the media library — photos, videos, recordings, podcasts — is indexed by
+// [MediaStore], which is a far better handle than a filesystem path: an entry has a stable id, a
+// MIME type, dimensions, duration and a bucket, and the same entry is addressable as a `content://`
+// URI that other apps accept. These tools let an agent browse, search, inspect, delete, rescan and
+// play media by id, and control playback and per-stream volume.
+//
+// Reading requires the matching Android 13+ media permission (`READ_MEDIA_IMAGES` /
+// `READ_MEDIA_VIDEO` / `READ_MEDIA_AUDIO`); each tool reports the exact missing permission instead
+// of failing silently. Changing media uses adaptive permissions, so deleting an item another app
+// owns needs the user's confirmation and reports an actionable error when that is required.
 
 /** Which MediaStore collection a media tool should look in. */
 private enum class MediaKind(
@@ -167,10 +165,15 @@ class ListMediaHandler(
         val order =
             when (sort.lowercase()) {
                 "newest" -> "${MediaStore.MediaColumns.DATE_ADDED} DESC"
+
                 "oldest" -> "${MediaStore.MediaColumns.DATE_ADDED} ASC"
+
                 "largest" -> "${MediaStore.MediaColumns.SIZE} DESC"
+
                 "smallest" -> "${MediaStore.MediaColumns.SIZE} ASC"
+
                 "name" -> "${MediaStore.MediaColumns.DISPLAY_NAME} ASC"
+
                 else -> throw McpToolException.InvalidParams(
                     "Parameter 'sort' must be one of: newest, oldest, largest, smallest, name. Got '$sort'.",
                 )
@@ -752,8 +755,9 @@ class SetStreamVolumeHandler(
                 ?: throw McpToolException.InvalidParams(
                     "Parameter 'stream' must be one of: ${STREAM_NAMES.keys.joinToString()}. Got '$streamName'.",
                 )
-        val audio = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
-            ?: throw McpToolException.ActionFailed("The audio service is unavailable on this device.")
+        val audio =
+            context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+                ?: throw McpToolException.ActionFailed("The audio service is unavailable on this device.")
         val max = audio.getStreamMaxVolume(stream)
         val index = ((percent.toDouble() / 100.0) * max).toInt().coerceIn(0, max)
         try {
@@ -963,10 +967,17 @@ internal object MediaPlayback {
                 mediaPlayer.isLooping = loop
                 mediaPlayer.setVolume(volume, volume)
                 when {
-                    source.startsWith("http://") || source.startsWith("https://") -> mediaPlayer.setDataSource(source)
-                    source.startsWith("content://") || source.startsWith("file://") ->
+                    source.startsWith("http://") || source.startsWith("https://") -> {
+                        mediaPlayer.setDataSource(source)
+                    }
+
+                    source.startsWith("content://") || source.startsWith("file://") -> {
                         mediaPlayer.setDataSource(context, Uri.parse(source))
-                    else -> mediaPlayer.setDataSource(source)
+                    }
+
+                    else -> {
+                        mediaPlayer.setDataSource(source)
+                    }
                 }
                 mediaPlayer.prepare()
                 mediaPlayer.start()

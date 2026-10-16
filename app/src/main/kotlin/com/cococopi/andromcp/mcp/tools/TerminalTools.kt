@@ -9,13 +9,13 @@ import com.cococopi.andromcp.mcp.McpToolException
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
-import kotlinx.coroutines.delay
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
@@ -27,20 +27,18 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.thread
 
-/**
- * Persistent interactive-shell tool bundle.
- *
- * `shell_exec` starts a process, waits for it to finish and returns everything it printed. That is
- * the wrong shape for anything stateful: a REPL, an `adb`-style shell, a session that must stay
- * authenticated, or a program that only accepts input after it has started. These tools keep a
- * long-lived `sh` process per session so an agent can write to it, read the incremental output
- * when it is ready, and close it later.
- *
- * Sessions live in the server process, are capped at [TerminalSessions.MAX_SESSIONS], buffer at
- * most [TerminalSessions.MAX_BUFFER_CHARS] characters each, and are all closed when the server
- * stops. Every read returns the bytes produced since the last read, so nothing is lost between
- * calls and nothing is returned twice.
- */
+// Persistent interactive-shell tool bundle.
+//
+// `shell_exec` starts a process, waits for it to finish and returns everything it printed. That is
+// the wrong shape for anything stateful: a REPL, an `adb`-style shell, a session that must stay
+// authenticated, or a program that only accepts input after it has started. These tools keep a
+// long-lived `sh` process per session so an agent can write to it, read the incremental output
+// when it is ready, and close it later.
+//
+// Sessions live in the server process, are capped at [TerminalSessions.MAX_SESSIONS], buffer at
+// most [TerminalSessions.MAX_BUFFER_CHARS] characters each, and are all closed when the server
+// stops. Every read returns the bytes produced since the last read, so nothing is lost between
+// calls and nothing is returned twice.
 
 /** Process-wide registry of interactive shell sessions, keyed by a short session id. */
 internal object TerminalSessions {
@@ -106,7 +104,10 @@ internal object TerminalSessions {
     }
 
     /** Starts a new session running [shellCommand] (default `/system/bin/sh`). */
-    fun open(shellCommand: String, workingDirectory: String?): Session {
+    fun open(
+        shellCommand: String,
+        workingDirectory: String?,
+    ): Session {
         if (sessions.size >= MAX_SESSIONS) {
             throw McpToolException.ActionFailed(
                 "Already $MAX_SESSIONS interactive sessions are open. Close one with terminal_close, " +
@@ -181,6 +182,8 @@ internal object TerminalSessions {
 }
 
 /** Shell started by `terminal_open` when the caller does not name one. */
+private const val TERMINAL_DEFAULT_SHELL = "/system/bin/sh"
+
 /**
  * PID of a spawned child process, or -1 when it cannot be read.
  *
@@ -196,8 +199,6 @@ private fun pidOf(process: Process): Long =
     } catch (_: SecurityException) {
         -1L
     }
-
-private const val TERMINAL_DEFAULT_SHELL = "/system/bin/sh"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // terminal_open

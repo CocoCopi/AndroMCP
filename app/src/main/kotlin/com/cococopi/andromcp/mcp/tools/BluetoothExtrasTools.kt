@@ -7,9 +7,9 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
+import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
-import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.pm.PackageManager
@@ -31,21 +31,19 @@ import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 import java.util.concurrent.ConcurrentHashMap
 
-/**
- * Bluetooth and USB connectivity tool bundle.
- *
- * `get_bluetooth_state` answers whether Bluetooth is on; these tools do the work around it: run a
- * Bluetooth LE scan and read the results, pair and unpair devices, show what is currently connected
- * over which profile, and inspect wired USB devices attached to the port. That is the difference
- * between knowing a headset exists and being able to route to it, and between seeing a plugged-in
- * accessory and being able to name it.
- *
- * Bluetooth reads need the `BLUETOOTH_CONNECT` grant and a scan additionally needs `BLUETOOTH_SCAN`;
- * the tools name the exact missing permission. A scan also needs a grantable location permission on
- * some builds, because without it the system cannot prove the results are not being used to infer
- * position. USB devices are visible without a grant; claiming one from another app is not
- * something a tool can do on the user's behalf.
- */
+// Bluetooth and USB connectivity tool bundle.
+//
+// `get_bluetooth_state` answers whether Bluetooth is on; these tools do the work around it: run a
+// Bluetooth LE scan and read the results, pair and unpair devices, show what is currently connected
+// over which profile, and inspect wired USB devices attached to the port. That is the difference
+// between knowing a headset exists and being able to route to it, and between seeing a plugged-in
+// accessory and being able to name it.
+//
+// Bluetooth reads need the `BLUETOOTH_CONNECT` grant and a scan additionally needs `BLUETOOTH_SCAN`;
+// the tools name the exact missing permission. A scan also needs a grantable location permission on
+// some builds, because without it the system cannot prove the results are not being used to infer
+// position. USB devices are visible without a grant; claiming one from another app is not
+// something a tool can do on the user's behalf.
 
 /** A device discovered by the current Bluetooth LE scan. */
 private data class DiscoveredDevice(
@@ -282,8 +280,10 @@ class StartBluetoothScanHandler(
 ) {
     suspend fun execute(arguments: JsonObject?): CallToolResult {
         val filter = McpToolUtils.optionalString(arguments, "filter", "")
-        val waitSeconds = McpToolUtils.optionalInt(arguments, "wait_seconds", DEFAULT_WAIT_SECONDS)
-            .coerceIn(0, MAX_WAIT_SECONDS)
+        val waitSeconds =
+            McpToolUtils
+                .optionalInt(arguments, "wait_seconds", DEFAULT_WAIT_SECONDS)
+                .coerceIn(0, MAX_WAIT_SECONDS)
         val stopAfter = McpToolUtils.optionalBoolean(arguments, "stop_after", true)
         RuntimePermissionGate.require(context, Manifest.permission.BLUETOOTH_SCAN, TOOL_NAME)
         Log.d(TAG, "Executing start_bluetooth_scan")
@@ -732,19 +732,31 @@ class GetConnectedBluetoothDevicesHandler(
 
         val profiles =
             when (requested) {
-                "all" ->
+                "all" -> {
                     listOf(
                         "a2dp" to BluetoothProfile.A2DP,
                         "headset" to BluetoothProfile.HEADSET,
                         "gatt" to BluetoothProfile.GATT,
                     )
+                }
 
-                "a2dp" -> listOf("a2dp" to BluetoothProfile.A2DP)
-                "headset" -> listOf("headset" to BluetoothProfile.HEADSET)
-                "gatt" -> listOf("gatt" to BluetoothProfile.GATT)
-                else -> throw McpToolException.InvalidParams(
-                    "Parameter 'profile' must be one of: all, a2dp, headset, gatt. Got '$requested'.",
-                )
+                "a2dp" -> {
+                    listOf("a2dp" to BluetoothProfile.A2DP)
+                }
+
+                "headset" -> {
+                    listOf("headset" to BluetoothProfile.HEADSET)
+                }
+
+                "gatt" -> {
+                    listOf("gatt" to BluetoothProfile.GATT)
+                }
+
+                else -> {
+                    throw McpToolException.InvalidParams(
+                        "Parameter 'profile' must be one of: all, a2dp, headset, gatt. Got '$requested'.",
+                    )
+                }
             }
         val manager =
             context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
@@ -1009,6 +1021,10 @@ class GetUsbDeviceDetailHandler(
 }
 
 /** Resolves the USB manager, failing clearly on hardware without USB host support. */
+private fun usbManager(context: Context): UsbManager =
+    context.getSystemService(Context.USB_SERVICE) as? UsbManager
+        ?: throw McpToolException.ActionFailed("This device does not expose a USB manager.")
+
 /**
  * Unpairs [device] by calling `BluetoothDevice.removeBond()` reflectively.
  *
@@ -1025,10 +1041,6 @@ private fun removeBond(device: BluetoothDevice): Boolean =
                 "(${exception.javaClass.simpleName}). Unpair the device from Settings > Bluetooth.",
         )
     }
-
-private fun usbManager(context: Context): UsbManager =
-    context.getSystemService(Context.USB_SERVICE) as? UsbManager
-        ?: throw McpToolException.ActionFailed("This device does not expose a USB manager.")
 
 /** Human-readable name of a Bluetooth bond state. */
 private fun bondStateName(bondState: Int): String =

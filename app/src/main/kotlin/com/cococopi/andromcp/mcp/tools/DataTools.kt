@@ -28,15 +28,13 @@ import java.util.UUID
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
-/**
- * Data, encoding and text-processing tool bundle.
- *
- * The deterministic half of an agent's toolbox: encode and decode base64, compute digests and
- * HMAC signatures, generate identifiers and random values, query JSON, work with regular
- * expressions and URLs, and parse or diff text and CSV. These tools touch no device state, hold no
- * permission and are safe to call in any order, which makes them the cheapest way for an agent to
- * prepare or verify a payload before it hands that payload to a device-facing tool.
- */
+// Data, encoding and text-processing tool bundle.
+//
+// The deterministic half of an agent's toolbox: encode and decode base64, compute digests and
+// HMAC signatures, generate identifiers and random values, query JSON, work with regular
+// expressions and URLs, and parse or diff text and CSV. These tools touch no device state, hold no
+// permission and are safe to call in any order, which makes them the cheapest way for an agent to
+// prepare or verify a payload before it hands that payload to a device-facing tool.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // base64_encode
@@ -711,7 +709,8 @@ class RegexFindHandler(
 
         val regex = buildRegex(arguments, pattern)
         val matches =
-            regex.findAll(input)
+            regex
+                .findAll(input)
                 .take(limit)
                 .map { match ->
                     buildJsonObject {
@@ -1042,7 +1041,10 @@ class TextStatsHandler(
 
         val words = WORD_PATTERN.findAll(text).map { it.value.lowercase() }.toList()
         val frequencies =
-            words.groupingBy { it }.eachCount().entries
+            words
+                .groupingBy { it }
+                .eachCount()
+                .entries
                 .sortedByDescending { it.value }
                 .take(topWords)
         val json =
@@ -1376,8 +1378,7 @@ private fun dataRegistrations(
 private fun hexOf(bytes: ByteArray): String = bytes.joinToString("") { "%02x".format(it) }
 
 /** Builds the character set for `random_string` from a name or a literal set. */
-private fun charactersFor(alphabetName: String): String =
-    ALPHABETS[alphabetName.lowercase()] ?: alphabetName
+private fun charactersFor(alphabetName: String): String = ALPHABETS[alphabetName.lowercase()] ?: alphabetName
 
 /** Draws [length] characters from [characters] using [random]. */
 private fun randomString(
@@ -1427,7 +1428,11 @@ private fun queryJsonPath(
 ): JsonElement? {
     if (path.isBlank()) return root
     val segments =
-        path.replace("[", ".").replace("]", "").split(".").filter { it.isNotBlank() }
+        path
+            .replace("[", ".")
+            .replace("]", "")
+            .split(".")
+            .filter { it.isNotBlank() }
     var current: JsonElement? = root
     segments.forEach { segment ->
         val node = current
@@ -1462,7 +1467,10 @@ private fun parseDelimited(
                 index++
             }
 
-            character == '"' -> inQuotes = !inQuotes
+            character == '"' -> {
+                inQuotes = !inQuotes
+            }
+
             !inQuotes && character == delimiter -> {
                 row.add(cell.toString())
                 cell.clear()
@@ -1476,7 +1484,9 @@ private fun parseDelimited(
                 row = mutableListOf()
             }
 
-            else -> cell.append(character)
+            else -> {
+                cell.append(character)
+            }
         }
         index++
     }

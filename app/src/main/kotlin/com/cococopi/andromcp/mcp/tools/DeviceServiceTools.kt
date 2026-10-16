@@ -30,20 +30,18 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 
-/**
- * Device Services tool bundle.
- *
- * Turns the phone's own hardware and system services into MCP tools: speaking aloud through the
- * TTS engine, controlling media playback and volume, reading battery state, driving the torch,
- * reporting device identity, and setting alarms/timers/phone numbers via the system clock and
- * dialer apps.
- *
- * None of these tools require a runtime permission: they use public system APIs and delegate to
- * the stock Clock and Dialer apps through [IntentDispatcher]. The only pre-existing exceptions are
- * streams that the device may restrict to the notification-policy grant (e.g. the `ring` and
- * `alarm` streams on Stock Android); those surface as a permission error rather than a silent
- * no-op.
- */
+// Device Services tool bundle.
+//
+// Turns the phone's own hardware and system services into MCP tools: speaking aloud through the
+// TTS engine, controlling media playback and volume, reading battery state, driving the torch,
+// reporting device identity, and setting alarms/timers/phone numbers via the system clock and
+// dialer apps.
+//
+// None of these tools require a runtime permission: they use public system APIs and delegate to
+// the stock Clock and Dialer apps through [IntentDispatcher]. The only pre-existing exceptions are
+// streams that the device may restrict to the notification-policy grant (e.g. the `ring` and
+// `alarm` streams on Stock Android); those surface as a permission error rather than a silent
+// no-op.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // speak_text

@@ -44,8 +44,7 @@ internal object RuntimePermissionGate {
     }
 
     /** Opens the OS app-details screen for this app, where every permission can be granted. */
-    fun openAppDetails(context: Context): Boolean =
-        launch(context, Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, appUri(context)))
+    fun openAppDetails(context: Context): Boolean = launch(context, Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, appUri(context)))
 
     /** Opens an OS settings screen identified by [action]. Returns false when none handles it. */
     fun openSettings(
