@@ -30,21 +30,37 @@ import com.cococopi.andromcp.mcp.tools.LoggedToolRegistrar
 import com.cococopi.andromcp.mcp.tools.McpToolUtils
 import com.cococopi.andromcp.mcp.tools.ReferenceCountedToolCallIndicator
 import com.cococopi.andromcp.mcp.tools.ToolCallIndicator
+import com.cococopi.andromcp.mcp.tools.registerAgentMemoryTools
 import com.cococopi.andromcp.mcp.tools.registerAppManagementTools
+import com.cococopi.andromcp.mcp.tools.registerAudioCaptureTools
+import com.cococopi.andromcp.mcp.tools.registerBluetoothExtrasTools
 import com.cococopi.andromcp.mcp.tools.registerCameraTools
+import com.cococopi.andromcp.mcp.tools.registerCommsTools
+import com.cococopi.andromcp.mcp.tools.registerCryptoVaultTools
+import com.cococopi.andromcp.mcp.tools.registerDataTools
 import com.cococopi.andromcp.mcp.tools.registerDeviceServiceTools
+import com.cococopi.andromcp.mcp.tools.registerDeviceSettingsTools
 import com.cococopi.andromcp.mcp.tools.registerFileTools
 import com.cococopi.andromcp.mcp.tools.registerGestureTools
+import com.cococopi.andromcp.mcp.tools.registerHardwareTools
 import com.cococopi.andromcp.mcp.tools.registerIntentTools
 import com.cococopi.andromcp.mcp.tools.registerLocationTools
+import com.cococopi.andromcp.mcp.tools.registerMediaTools
+import com.cococopi.andromcp.mcp.tools.registerNetworkTools
 import com.cococopi.andromcp.mcp.tools.registerNodeActionTools
+import com.cococopi.andromcp.mcp.tools.registerNotificationExtrasTools
 import com.cococopi.andromcp.mcp.tools.registerNotificationTools
+import com.cococopi.andromcp.mcp.tools.registerPackageTools
 import com.cococopi.andromcp.mcp.tools.registerScreenIntrospectionTools
 import com.cococopi.andromcp.mcp.tools.registerSharingTools
+import com.cococopi.andromcp.mcp.tools.registerShellTools
 import com.cococopi.andromcp.mcp.tools.registerSystemActionTools
+import com.cococopi.andromcp.mcp.tools.registerTerminalTools
 import com.cococopi.andromcp.mcp.tools.registerTextInputTools
 import com.cococopi.andromcp.mcp.tools.registerTouchActionTools
 import com.cococopi.andromcp.mcp.tools.registerUtilityTools
+import com.cococopi.andromcp.mcp.tools.registerWebTools
+import com.cococopi.andromcp.mcp.tools.registerWorkspaceTools
 import com.cococopi.andromcp.privacy.PlaceholderSubstitutor
 import com.cococopi.andromcp.privacy.PrivacyModeManager
 import com.cococopi.andromcp.privacy.PrivacyModeStatus
@@ -471,6 +487,22 @@ class McpServerService : Service() {
         registerLocationTools(registrar, locationProvider, privacyToolGate, toolNamePrefix, perms)
         registerSharingBundle(registrar, toolNamePrefix, perms, fileSizeLimitMb)
         registerDeviceServiceTools(registrar, applicationContext, intentDispatcher, toolNamePrefix, perms)
+        registerCommsTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerNetworkTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerHardwareTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerDeviceSettingsTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerWorkspaceTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerDataTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerShellTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerTerminalTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerMediaTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerAudioCaptureTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerCryptoVaultTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerPackageTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerBluetoothExtrasTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerNotificationExtrasTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerWebTools(registrar, applicationContext, toolNamePrefix, perms)
+        registerAgentMemoryTools(registrar, applicationContext, toolNamePrefix, perms)
     }
 
     private fun registerAccessibilityToolBundle(

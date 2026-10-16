@@ -30,12 +30,27 @@ This document provides a comprehensive reference for all MCP tools available in 
 17. [Location Tools](#13-location-tools)
 18. [Sharing Tools](#14-sharing-tools)
 19. [Device Services Tools](#15-device-services-tools)
+20. [Communication Tools](#16-communication-tools)
+21. [Network Tools](#17-network-tools)
+22. [Hardware Tools](#18-hardware-tools)
+23. [Device Settings Tools](#19-device-settings-tools)
+24. [Workspace File Tools](#20-workspace-file-tools)
+25. [Data & Text Tools](#21-data--text-tools)
+26. [Shell & Terminal Tools](#22-shell--terminal-tools)
+27. [Media Library Tools](#23-media-library-tools)
+28. [Audio Capture Tools](#24-audio-capture-tools)
+29. [Security & Vault Tools](#25-security--vault-tools)
+30. [App Management Plus Tools](#26-app-management-plus-tools)
+31. [Bluetooth & USB Tools](#27-bluetooth--usb-tools)
+32. [Notification Extras Tools](#28-notification-extras-tools)
+33. [Web & Feed Tools](#29-web--feed-tools)
+34. [Agent Memory Tools](#30-agent-memory-tools)
 
 ---
 
 ## Overview
 
-The MCP server exposes 67 tools via the JSON-RPC 2.0 protocol, organized into 15 categories:
+The MCP server exposes 234 tools via the JSON-RPC 2.0 protocol, organized into 30 categories:
 
 | Category | Tools | Plan |
 |----------|-------|------|
@@ -54,6 +69,21 @@ The MCP server exposes 67 tools via the JSON-RPC 2.0 protocol, organized into 15
 | Location | `andromcp_get_location` | 43 |
 | Sharing | `andromcp_get_shared_content`, `andromcp_share_file_via_web` | 48 |
 | Device Services | `andromcp_speak_text`, `andromcp_get_volume`, `andromcp_set_volume`, `andromcp_media_control`, `andromcp_get_battery_status`, `andromcp_set_flashlight`, `andromcp_get_device_info`, `andromcp_set_alarm`, `andromcp_set_timer`, `andromcp_dial_number` | - |
+| Communication | `andromcp_send_sms`, `andromcp_list_sms_threads`, `andromcp_read_sms_thread`, `andromcp_search_sms`, `andromcp_list_call_log`, `andromcp_search_contacts`, `andromcp_get_contact_details`, `andromcp_create_contact`, `andromcp_list_calendar_events`, `andromcp_create_calendar_event`, `andromcp_delete_calendar_event`, `andromcp_list_calendars`, `andromcp_compose_email` | - |
+| Network | `andromcp_http_request`, `andromcp_get_network_info`, `andromcp_get_public_ip`, `andromcp_dns_lookup`, `andromcp_ping_host`, `andromcp_check_tcp_port`, `andromcp_list_wifi_networks`, `andromcp_get_wifi_info`, `andromcp_get_network_interfaces` | - |
+| Hardware | `andromcp_list_sensors`, `andromcp_read_sensor`, `andromcp_get_battery_details`, `andromcp_get_thermal_status`, `andromcp_get_memory_info`, `andromcp_get_storage_usage`, `andromcp_get_cpu_info`, `andromcp_get_uptime`, `andromcp_vibrate`, `andromcp_get_nfc_state`, `andromcp_get_bluetooth_state`, `andromcp_list_bluetooth_devices`, `andromcp_get_display_info`, `andromcp_get_audio_devices` | - |
+| Device Settings | `andromcp_get_brightness`, `andromcp_set_brightness`, `andromcp_get_screen_timeout`, `andromcp_set_screen_timeout`, `andromcp_set_rotation_lock`, `andromcp_get_font_scale`, `andromcp_set_font_scale`, `andromcp_get_ringer_mode`, `andromcp_set_ringer_mode`, `andromcp_get_dnd_state`, `andromcp_set_dnd_mode`, `andromcp_get_airplane_mode`, `andromcp_open_settings_screen` | - |
+| Workspace Files | `andromcp_list_workspace_files`, `andromcp_make_directory`, `andromcp_copy_path`, `andromcp_move_path`, `andromcp_delete_path`, `andromcp_get_path_info`, `andromcp_compute_file_hash`, `andromcp_find_files`, `andromcp_search_in_files`, `andromcp_zip_path`, `andromcp_unzip_file`, `andromcp_read_workspace_file`, `andromcp_write_workspace_file` | - |
+| Data & Text | `andromcp_base64_encode`, `andromcp_base64_decode`, `andromcp_hash_string`, `andromcp_hmac_sign`, `andromcp_generate_uuid`, `andromcp_random_number`, `andromcp_random_string`, `andromcp_json_query`, `andromcp_regex_find`, `andromcp_regex_replace`, `andromcp_url_encode`, `andromcp_url_decode`, `andromcp_text_stats`, `andromcp_diff_text`, `andromcp_csv_to_json` | - |
+| Shell & Terminal | `andromcp_shell_exec`, `andromcp_su_exec`, `andromcp_check_root`, `andromcp_list_processes`, `andromcp_get_system_properties`, `andromcp_get_environment`, `andromcp_read_logcat`, `andromcp_read_system_file`, `andromcp_terminal_open`, `andromcp_terminal_write`, `andromcp_terminal_read`, `andromcp_terminal_list`, `andromcp_terminal_close` | - |
+| Media Library | `andromcp_list_media`, `andromcp_search_media`, `andromcp_get_media_info`, `andromcp_delete_media`, `andromcp_scan_media_path`, `andromcp_play_media`, `andromcp_stop_media`, `andromcp_get_playback_state`, `andromcp_set_stream_volume`, `andromcp_list_media_directories` | - |
+| Audio Capture | `andromcp_start_audio_recording`, `andromcp_stop_audio_recording`, `andromcp_get_recording_state`, `andromcp_list_recordings`, `andromcp_delete_recording`, `andromcp_measure_noise_level`, `andromcp_get_microphone_info` | - |
+| Security & Vault | `andromcp_encrypt_text`, `andromcp_decrypt_text`, `andromcp_keystore_generate_key`, `andromcp_keystore_list_keys`, `andromcp_keystore_delete_key`, `andromcp_keystore_sign`, `andromcp_keystore_verify`, `andromcp_secret_store`, `andromcp_secret_get`, `andromcp_secret_delete`, `andromcp_secret_list`, `andromcp_generate_password`, `andromcp_password_strength` | - |
+| App Management Plus | `andromcp_list_installed_apps`, `andromcp_search_apps`, `andromcp_get_app_info`, `andromcp_get_app_permissions`, `andromcp_get_app_components`, `andromcp_get_app_signature`, `andromcp_get_app_usage_stats`, `andromcp_launch_app`, `andromcp_force_stop_app`, `andromcp_open_app_settings`, `andromcp_uninstall_app`, `andromcp_install_apk`, `andromcp_get_install_status`, `andromcp_query_intent_handlers` | - |
+| Bluetooth & USB | `andromcp_get_bluetooth_summary`, `andromcp_start_bluetooth_scan`, `andromcp_get_bluetooth_scan_results`, `andromcp_stop_bluetooth_scan`, `andromcp_pair_bluetooth_device`, `andromcp_unpair_bluetooth_device`, `andromcp_get_bluetooth_bond_state`, `andromcp_get_connected_bluetooth_devices`, `andromcp_open_bluetooth_settings`, `andromcp_list_usb_devices`, `andromcp_get_usb_device_detail` | - |
+| Notification Extras | `andromcp_post_notification`, `andromcp_cancel_notification`, `andromcp_cancel_all_notifications`, `andromcp_list_notification_channels`, `andromcp_create_notification_channel`, `andromcp_delete_notification_channel`, `andromcp_get_notification_policy`, `andromcp_check_notification_permission`, `andromcp_open_notification_settings` | - |
+| Web & Feeds | `andromcp_fetch_webpage`, `andromcp_extract_links`, `andromcp_fetch_json`, `andromcp_check_url_status`, `andromcp_get_rss_feed`, `andromcp_get_weather`, `andromcp_download_to_workspace` | - |
+| Agent Memory | `andromcp_memory_set`, `andromcp_memory_get`, `andromcp_memory_list`, `andromcp_memory_search`, `andromcp_memory_delete`, `andromcp_memory_clear` | - |
 
 ## Tool Naming Convention
 
@@ -3686,3 +3716,1274 @@ Opens the system dialer with a phone number pre-filled, ready for the user to st
 > **Note**: this tool does **not** place the call by itself. Placing a call requires the `CALL_PHONE`
 > runtime permission, so the final tap stays with the user. This is deliberate: a remotely-driven
 > device should not be able to dial silently.
+
+---
+
+## 16. Communication Tools
+
+Tools that reach the account data a phone actually holds: text messages, the call log, contacts
+and calendar events, plus sending a message or handing a pre-filled e-mail to a mail client.
+
+**Service**: Android content providers (`Telephony`, `CallLog`, `ContactsContract`,
+`CalendarContract`), `SmsManager`, and `IntentDispatcher` for the mail composer
+**Permission**: runtime permissions, granted per app in Android Settings — `SEND_SMS`, `READ_SMS`,
+`READ_CALL_LOG`, `READ_CONTACTS`, `WRITE_CONTACTS`, `READ_CALENDAR`, `WRITE_CALENDAR`.
+`compose_email` needs none. Every tool in this category checks its own permission at call time and,
+when it is missing, fails with an actionable error naming the permission and the screen to open
+rather than returning an empty result.
+**Untrusted content**: the read tools are wrapped with the `UNTRUSTED_CONTENT_WARNING`.
+
+All thirteen tools are individually toggleable under **Settings → MCP Tools → Communication**.
+
+### `andromcp_send_sms`
+Sends a text message from the device's SIM; long bodies are split into multiple SMS parts.
+
+**Parameters**: `phone_number` (string, required), `message` (string, required).
+**Returns**: text confirmation with the character count and part count.
+**Errors**: `PermissionDenied` without `SEND_SMS`; `ActionFailed` when the device exposes no SMS service.
+
+### `andromcp_list_sms_threads`
+Lists conversations, newest first, with thread id, address, message count and a preview.
+
+**Parameters**: `limit` (integer, default 20, max 200).
+
+### `andromcp_read_sms_thread`
+Reads the messages of one conversation, newest first.
+
+**Parameters**: `thread_id` (integer, from `list_sms_threads`), `address` (string, matched loosely),
+`limit` (integer, default 50, max 500). One of `thread_id` or `address` is required.
+Each message reports its body, direction and an ISO-8601 timestamp.
+
+### `andromcp_search_sms`
+Searches all messages by substring of body or address, newest first.
+
+**Parameters**: `query` (string, required), `limit` (integer, default 50, max 500).
+
+### `andromcp_list_call_log`
+Lists recent calls with number, cached contact name, direction and duration.
+
+**Parameters**: `limit` (integer, default 50, max 500), `type` (string, optional filter: `INCOMING`,
+`OUTGOING`, `MISSED`, `REJECTED`, `BLOCKED`, `VOICEMAIL`).
+
+### `andromcp_search_contacts`
+Looks up contacts by substring of name or number.
+
+**Parameters**: `query` (string, required), `limit` (integer, default 25, max 200).
+
+### `andromcp_get_contact_details`
+Returns every phone number and e-mail address stored for one contact.
+
+**Parameters**: `contact_id` (integer, required).
+
+### `andromcp_create_contact`
+Creates a contact with a display name and optional single phone number and e-mail address.
+
+**Parameters**: `display_name` (string, required), `phone_number` (string), `email` (string).
+**Errors**: `PermissionDenied` without `WRITE_CONTACTS`.
+
+### `andromcp_list_calendar_events`
+Lists event instances in a time window, ordered by start time; recurring events are expanded.
+
+**Parameters**: `days_back` (integer, default 0, max 365), `days_ahead` (integer, default 7, max 365),
+`limit` (integer, default 50, max 500).
+
+### `andromcp_create_calendar_event`
+Creates a calendar event.
+
+**Parameters**: `title` (string, required), `start_time` (string, required; ISO-8601 instant or epoch
+milliseconds), `end_time` (string), `duration_minutes` (integer, default 60, max 43200),
+`calendar_id` (integer, defaults to the first writable calendar), `location` (string),
+`description` (string), `all_day` (boolean, default false).
+**Errors**: `ActionFailed` when no writable calendar is configured.
+
+### `andromcp_delete_calendar_event`
+Deletes one event by id; synced calendars forward the removal to the account on the next sync.
+
+**Parameters**: `event_id` (integer, required). **Errors**: `NodeNotFound` for an unknown id.
+
+### `andromcp_list_calendars`
+Lists every calendar with its id, display name, owning account, writability and visibility.
+
+**Parameters**: none.
+
+### `andromcp_compose_email`
+Opens the mail app with recipient, subject and body pre-filled; the user performs the send.
+
+**Parameters**: `to` (string, required), `subject` (string), `body` (string).
+**Returns**: text confirmation. **Errors**: `ActionFailed` when no mail client is installed.
+
+---
+
+## 17. Network Tools
+
+Turns the device into a network probe and an HTTP client the agent can drive directly.
+
+**Service**: `HttpURLConnection`, `ConnectivityManager`, `WifiManager`, `NetworkInterface`,
+`InetAddress`, `Socket`
+**Permission**: none beyond the app's existing `INTERNET` and `ACCESS_NETWORK_STATE` grants, except
+`list_wifi_networks` and `get_wifi_info`, which need `ACCESS_FINE_LOCATION` — the permission Android
+requires before it returns real SSIDs instead of redacting them. Both self-gate with an actionable
+error.
+
+All nine tools are individually toggleable under **Settings → MCP Tools → Network**.
+
+### `andromcp_http_request`
+Performs an HTTP or HTTPS request and returns status code, headers and body.
+
+**Parameters**: `url` (string, required), `method` (string, default `GET`; one of `GET`, `POST`,
+`PUT`, `DELETE`, `HEAD`, `OPTIONS`), `headers` (object), `body` (string),
+`follow_redirects` (boolean, default true), `timeout_ms` (integer, default 30000, max 120000),
+`max_response_chars` (integer, default 20000, max 200000).
+**Returns**: JSON with `status_code`, `headers`, `body` and `body_truncated`.
+**Errors**: `ActionFailed` on a connection or read failure, `InvalidParams` for a non-http(s) or
+hostless URL.
+
+### `andromcp_get_network_info`
+Reports the active network: transport, metered and validated flags, interface name, MTU, bandwidth
+estimates, IP addresses with prefix lengths and DNS servers.
+
+**Parameters**: none.
+
+### `andromcp_get_public_ip`
+Reports the connection's public IP by querying an external plain-text echo service.
+
+**Parameters**: `endpoint` (string, default `https://api.ipify.org`), `timeout_ms` (integer,
+default 30000, max 120000). **Note**: the request leaves the device and the endpoint learns the
+address it answered with.
+
+### `andromcp_dns_lookup`
+Resolves a host name, returning every address plus the canonical host name.
+
+**Parameters**: `host` (string, required). **Errors**: `NodeNotFound` when resolution yields nothing.
+
+### `andromcp_ping_host`
+Reachability probe with a measured round-trip time.
+
+**Parameters**: `host` (string, required), `timeout_ms` (integer, default 5000, max 30000).
+**Note**: this is a platform echo probe, not a strict ICMP ping, so a host that drops probes may
+report unreachable while its services work — pair it with `check_tcp_port`.
+
+### `andromcp_check_tcp_port`
+Opens a TCP connection to a host and port and reports whether something is listening.
+
+**Parameters**: `host` (string, required), `port` (integer, required, 1-65535),
+`timeout_ms` (integer, default 5000, max 30000). A refused connection is reported as
+`open: false`, not as a tool error.
+
+### `andromcp_list_wifi_networks`
+Lists visible Wi-Fi networks, strongest first, with SSID, BSSID, signal strength, frequency,
+capabilities and the age of the cached scan result.
+
+**Parameters**: `limit` (integer, default 30, max 200). **Permission**: `ACCESS_FINE_LOCATION`.
+
+### `andromcp_get_wifi_info`
+Reports the joined network: SSID, BSSID, signal strength, current and maximum receive and transmit
+link rates, and frequency.
+
+**Parameters**: none. **Permission**: `ACCESS_FINE_LOCATION`. Returns `connected: false` when the
+active connection is not Wi-Fi.
+
+### `andromcp_get_network_interfaces`
+Lists every network interface with its name, state, MTU, MAC address and IPv4/IPv6 addresses.
+
+**Parameters**: none.
+
+---
+
+## 18. Hardware Tools
+
+Exposes the physical side of the phone: sensors, battery and thermal state, memory, storage, SoC
+identity, vibration, radios, display geometry and audio routing.
+
+**Service**: `SensorManager`, `BatteryManager`, `PowerManager`, `ActivityManager`, `StatFs`,
+`Build`, `VibratorManager`, `NfcManager`, `BluetoothManager`, `DisplayManager`, `AudioManager`
+**Permission**: none, except `get_bluetooth_state` and `list_bluetooth_devices`, which need the
+`BLUETOOTH_CONNECT` runtime permission and self-gate with an actionable error. Body sensors such as
+heart rate need `BODY_SENSORS`, which this app deliberately does not request, so those reads fail
+with a permission error instead.
+
+All fourteen tools are individually toggleable under **Settings → MCP Tools → Hardware**.
+
+### `andromcp_list_sensors`
+Lists every sensor with its name, numeric and string type, vendor, version, range, resolution, power
+draw and minimum delay.
+
+**Parameters**: none.
+
+### `andromcp_read_sensor`
+Takes one reading from a named sensor and returns its raw values with the sensor's range and
+resolution.
+
+**Parameters**: `sensor_type` (string, required: `accelerometer`, `magnetometer`, `gyroscope`,
+`light`, `pressure`, `proximity`, `gravity`, `linear_acceleration`, `rotation_vector`,
+`game_rotation_vector`, `geomagnetic_rotation_vector`, `step_counter`, `step_detector`,
+`ambient_temperature`, `relative_humidity`, `heart_rate`, `significant_motion`, `pose_6dof`,
+`stationary_detect`, `motion_detect`, `hinge_angle`), `timeout_ms` (integer, default 3000, max
+30000).
+**Errors**: `NodeNotFound` when the device has no such sensor; `Timeout` when no event arrives;
+`PermissionDenied` for body sensors.
+
+### `andromcp_get_battery_details`
+Reports charge percentage, charging state, health, technology, voltage, temperature, current draw
+and the charge/energy counters.
+
+**Parameters**: none. Complements `andromcp_get_battery_status`, which reports the short summary.
+
+### `andromcp_get_thermal_status`
+Reports the platform thermal status (`NONE` through `SHUTDOWN`), battery-saver state, doze state,
+screen interactivity and whether sustained performance mode is available.
+
+**Parameters**: none.
+
+### `andromcp_get_memory_info`
+Reports system total and available RAM, the low-memory threshold and flag, and this app's heap
+ceiling, allocation and proportional/private-dirty set sizes.
+
+**Parameters**: none.
+
+### `andromcp_get_storage_usage`
+Reports total, used and available bytes plus used percentage for internal and external storage, and
+the external storage state.
+
+**Parameters**: none.
+
+### `andromcp_get_cpu_info`
+Reports the SoC manufacturer and model, hardware and board names, supported ABIs, available
+processors, Android release, API level and build fingerprint.
+
+**Parameters**: none.
+
+### `andromcp_get_uptime`
+Reports time since boot, time awake, time asleep, the boot instant and the current wall-clock time.
+
+**Parameters**: none.
+
+### `andromcp_vibrate`
+Vibrates for a given duration at an optional strength.
+
+**Parameters**: `duration_ms` (integer, default 300, max 10000), `amplitude` (integer, default -1 for
+the device default, otherwise 1-255).
+**Errors**: `ActionFailed` when the device has no vibrator.
+
+### `andromcp_get_nfc_state`
+Reports whether the device has NFC and whether it is switched on. Read-only.
+
+**Parameters**: none.
+
+### `andromcp_get_bluetooth_state`
+Reports whether Bluetooth is present and enabled, its power state, the device's Bluetooth name and
+how many devices are paired.
+
+**Parameters**: none. **Permission**: `BLUETOOTH_CONNECT`.
+
+### `andromcp_list_bluetooth_devices`
+Lists paired Bluetooth devices with name, MAC address, classic/LE mode and pairing state.
+
+**Parameters**: none. **Permission**: `BLUETOOTH_CONNECT`.
+
+### `andromcp_get_display_info`
+Reports screen geometry and capabilities: logical width and height, density, rotation, physical
+resolution and refresh rate, and HDR support.
+
+**Parameters**: none.
+
+### `andromcp_get_audio_devices`
+Lists attached audio devices with type, product name, direction, channel counts and sample rates,
+plus the current audio mode and whether media is playing.
+
+**Parameters**: none.
+
+---
+
+## 19. Device Settings Tools
+
+Reads and changes the settings a person actually fiddles with, and can deep-link to any system
+settings page by name.
+
+**Service**: `Settings.System`, `Settings.Global`, `AudioManager`, `NotificationManager`
+**Permission**: the two escalating grants this app cannot request at runtime — **"Modify system
+settings"** (for the brightness, timeout, rotation and font writes) and **"Do Not Disturb access"**
+(for the ringer and DND tools). Both are checked before every write and produce an actionable error
+naming the screen to open; declaring the permissions in the manifest is what lists the app in those
+Settings screens.
+
+All thirteen tools are individually toggleable under **Settings → MCP Tools → Device Settings**.
+
+### `andromcp_get_brightness`
+Reports the raw brightness level, the same value as a percentage, whether automatic brightness is on
+and whether the app may change it.
+
+**Parameters**: none.
+
+### `andromcp_set_brightness`
+Sets the screen brightness and optionally switches automatic brightness on or off.
+
+**Parameters**: `brightness` (integer, required, 0-255), `auto_brightness` (boolean, default false —
+turning it off is what makes the chosen level stick).
+**Errors**: `PermissionDenied` without "Modify system settings".
+
+### `andromcp_get_screen_timeout`
+Reports the screen-off timeout in milliseconds and seconds.
+
+**Parameters**: none.
+
+### `andromcp_set_screen_timeout`
+Changes the screen-off timeout, the most reliable way to stop the display sleeping mid-sequence.
+
+**Parameters**: `timeout_ms` (integer, default 600000, min 5000, max 86400000).
+**Errors**: `PermissionDenied` without "Modify system settings".
+
+### `andromcp_set_rotation_lock`
+Locks or unlocks screen rotation.
+
+**Parameters**: `auto_rotate` (boolean, default true), `rotation_degrees` (integer, one of 0, 90, 180,
+270; default 0; only used when `auto_rotate` is false).
+**Errors**: `PermissionDenied` without "Modify system settings".
+
+### `andromcp_get_font_scale`
+Reports the configured and effective font scale.
+
+**Parameters**: none.
+
+### `andromcp_set_font_scale`
+Changes the user's text-size setting.
+
+**Parameters**: `scale` (number, required, 0.5-2.0; default is 1.0).
+**Errors**: `PermissionDenied` without "Modify system settings".
+
+### `andromcp_get_ringer_mode`
+Reports `NORMAL`, `VIBRATE` or `SILENT`, whether media is playing, and whether Do Not Disturb access
+is held.
+
+**Parameters**: none.
+
+### `andromcp_set_ringer_mode`
+Switches between ringing, vibrate-only and silent.
+
+**Parameters**: `mode` (string, required: `NORMAL`, `VIBRATE` or `SILENT`).
+**Errors**: `PermissionDenied` for `VIBRATE`/`SILENT` without Do Not Disturb access.
+
+### `andromcp_get_dnd_state`
+Reports whether the app's notifications are enabled, whether policy access is held, and the current
+interruption filter.
+
+**Parameters**: none.
+
+### `andromcp_set_dnd_mode`
+Sets the interruption filter.
+
+**Parameters**: `mode` (string, required: `ALL`, `PRIORITY`, `ALARMS` or `NONE`).
+**Errors**: `PermissionDenied` without Do Not Disturb access.
+
+### `andromcp_get_airplane_mode`
+Reports airplane mode, Wi-Fi and mobile-data state. Read-only: Android grants write access to
+airplane mode only to system apps.
+
+**Parameters**: none.
+
+### `andromcp_open_settings_screen`
+Opens a system settings screen by name, so an agent that needs a grant can put the exact screen in
+front of the user.
+
+**Parameters**: `page` (string, required, case-insensitive: `app_details`, `write_settings`,
+`notification_policy`, `usage_access`, `battery_optimization`, `wifi`, `bluetooth`, `location`,
+`display`, `sound`, `notification_listener`, `accessibility`, `developer`, `date_time`, `storage`,
+`nfc`, `home`, `apps`, `default_apps`, `privacy`). `app_details` and `write_settings` open scoped to
+this app. **Errors**: `ActionFailed` when no screen handles the page.
+
+---
+
+## 20. Workspace File Tools
+
+A private, permission-free filesystem the agent owns: a directory it can create folders in, copy,
+move, delete, stat, hash, search, zip and unzip. This complements the Storage Access Framework file
+tools by giving the agent writable scratch space with no grant required.
+
+**Service**: `java.io.File`, `java.util.zip`, `MessageDigest`, `MimeTypeMap`
+**Permission**: none. Everything is confined to the app's own external files directory — which a
+file manager can also browse, making results verifiable — and every path is resolved canonically, so
+`../../etc/hosts` is rejected rather than followed.
+**Untrusted content**: file contents read back are wrapped with the `UNTRUSTED_CONTENT_WARNING`.
+
+All thirteen tools are individually toggleable under **Settings → MCP Tools → Workspace Files**.
+
+### `andromcp_list_workspace_files`
+Lists a directory, directories first, with each entry's name, relative path, size, modification time
+and MIME type, and reports the workspace root's absolute path.
+
+**Parameters**: `path` (string, default the root), `limit` (integer, default 200, max 1000).
+
+### `andromcp_make_directory`
+Creates a directory including missing parents; reports whether it was created or already existed.
+
+**Parameters**: `path` (string, required).
+
+### `andromcp_copy_path`
+Copies a file or a whole directory tree, creating parents as needed.
+
+**Parameters**: `source` (string, required), `destination` (string, required), `overwrite` (boolean,
+default false — the copy is refused when the destination exists).
+
+### `andromcp_move_path`
+Moves or renames a file or directory, trying a fast rename and falling back to copy-then-delete.
+
+**Parameters**: `source` (string, required), `destination` (string, required), `overwrite` (boolean,
+default false).
+
+### `andromcp_delete_path`
+Deletes a file or directory and reports how many entries went with it.
+
+**Parameters**: `path` (string, required), `recursive` (boolean, default false; required to be true
+for a directory). The workspace root itself can never be deleted.
+
+### `andromcp_get_path_info`
+Reports existence, type, size, modification time, readability, writability, MIME type and child
+count, plus an optional SHA-256 digest. A missing path is reported as `exists: false`.
+
+**Parameters**: `path` (string, required), `include_hash` (boolean, default false).
+
+### `andromcp_compute_file_hash`
+Computes a digest by streaming the file, so large files are never loaded into memory.
+
+**Parameters**: `path` (string, required), `algorithm` (string, default `SHA-256`; also `MD5`,
+`SHA-1`, `SHA-512`).
+
+### `andromcp_find_files`
+Finds files by glob pattern (`*` and `?`, case-insensitive).
+
+**Parameters**: `pattern` (string, required), `path` (string, default the root),
+`max_depth` (integer, default 10, max 64), `limit` (integer, default 100, max 1000).
+
+### `andromcp_search_in_files`
+Searches file text for a substring and returns each matching line with its file and 1-based line
+number. Unreadable files and files above one megabyte are skipped.
+
+**Parameters**: `query` (string, required), `path` (string), `extensions` (string, comma-separated
+filter), `case_sensitive` (boolean, default false), `max_depth` (integer, default 10, max 64),
+`limit` (integer, default 50, max 500).
+
+### `andromcp_zip_path`
+Compresses a file or directory tree into a zip archive.
+
+**Parameters**: `source` (string, required), `destination` (string, default the source name plus
+`.zip`), `overwrite` (boolean, default false).
+
+### `andromcp_unzip_file`
+Extracts a zip archive, refusing entries whose stored path would escape the destination directory.
+
+**Parameters**: `source` (string, required), `destination` (string, required), `overwrite` (boolean,
+default false).
+
+### `andromcp_read_workspace_file`
+Reads a file as numbered lines with pagination, or as base64-encoded bytes for binary content.
+
+**Parameters**: `path` (string, required), `offset` (integer, default 1),
+`limit` (integer, default 200, max 2000), `as_base64` (boolean, default false),
+`max_bytes` (integer, default 1048576, max 16777216).
+
+### `andromcp_write_workspace_file`
+Writes text or base64-decoded bytes, creating parents as needed.
+
+**Parameters**: `path` (string, required), `content` (string), `base64_content` (string),
+`append` (boolean, default false). One of `content` or `base64_content` is required.
+
+---
+
+## 21. Data & Text Tools
+
+The deterministic half of the toolbox: encoding, digests, signatures, identifiers, random values,
+JSON, regular expressions, URLs and text/CSV processing.
+
+**Service**: `java.util.Base64`, `MessageDigest`, `Mac`, `UUID`, `SecureRandom`, `java.net`
+**Permission**: none. These tools touch no device state and are safe to call in any order, which
+makes them the cheapest way to prepare or verify a payload before handing it to a device-facing tool.
+
+All fifteen tools are individually toggleable under **Settings → MCP Tools → Data & Text**.
+
+### `andromcp_base64_encode`
+Encodes text as base64.
+
+**Parameters**: `content` (string, required), `url_safe` (boolean, default false — use the URL-safe
+alphabet).
+
+### `andromcp_base64_decode`
+Decodes base64 to text, or to hexadecimal with `as_hex`. The response always includes the byte count,
+the hexadecimal form and the UTF-8 interpretation.
+
+**Parameters**: `content` (string, required), `url_safe` (boolean, default false),
+`as_hex` (boolean, default false). **Errors**: `InvalidParams` for malformed input.
+
+### `andromcp_hash_string`
+Computes a hexadecimal digest of a string.
+
+**Parameters**: `content` (string, required), `algorithm` (string, default `SHA-256`; also `MD5`,
+`SHA-1`, `SHA-512`).
+
+### `andromcp_hmac_sign`
+Computes an HMAC signature with a shared secret. The secret is never logged or echoed back.
+
+**Parameters**: `content` (string, required), `key` (string, required), `algorithm` (string, default
+`HMACSHA256`; also `HMACSHA1`, `HMACSHA512`), `base64` (boolean, default false).
+
+### `andromcp_generate_uuid`
+Generates random version-4 UUIDs.
+
+**Parameters**: `count` (integer, default 1, max 100).
+
+### `andromcp_random_number`
+Produces random whole numbers or decimals.
+
+**Parameters**: `minimum` (integer, default 0), `maximum` (integer, default 100),
+`count` (integer, default 1, max 1000), `integer` (boolean, default true).
+
+### `andromcp_random_string`
+Generates random strings from a named or literal alphabet.
+
+**Parameters**: `length` (integer, default 32, max 4096), `count` (integer, default 1, max 100),
+`alphabet` (string, default `alphanumeric`; also `alpha`, `numeric`, `hex`, `base64`, or a literal
+character set).
+
+### `andromcp_json_query`
+Extracts one value from a JSON document using a dot/bracket path (`user.name`, `items.0.id`,
+`items[0].id`). Reports whether the path was found, the value's type and the value.
+
+**Parameters**: `json` (string, required), `path` (string, required).
+**Errors**: `InvalidParams` for malformed JSON.
+
+### `andromcp_regex_find`
+Finds every regular-expression match, returning each match with its captured group and start/end
+offsets.
+
+**Parameters**: `pattern` (string, required), `input` (string, required), `group` (integer, default
+0), `limit` (integer, default 20, max 500), `ignore_case` (boolean, default false),
+`multiline` (boolean, default false).
+**Errors**: `InvalidParams` for an invalid pattern or input above 200000 characters.
+
+### `andromcp_regex_replace`
+Rewrites text with a regular expression, reporting whether anything actually changed.
+
+**Parameters**: `pattern` (string, required), `input` (string, required),
+`replacement` (string, required), `replace_all` (boolean, default true),
+`ignore_case` (boolean, default false), `multiline` (boolean, default false).
+
+### `andromcp_url_encode`
+Percent-encodes text for use inside a URL.
+
+**Parameters**: `content` (string, required), `space_as_plus` (boolean, default false — spaces become
+`%20`; `true` yields `+` for form-encoded bodies).
+
+### `andromcp_url_decode`
+Reverses percent-encoding.
+
+**Parameters**: `content` (string, required), `plus_as_space` (boolean, default true).
+**Errors**: `InvalidParams` for malformed input.
+
+### `andromcp_text_stats`
+Measures a text: characters with and without whitespace, words, unique words, lines, sentences and
+the most frequent words with counts.
+
+**Parameters**: `text` (string, required), `top_words` (integer, default 10, max 100).
+
+### `andromcp_diff_text`
+Compares two texts and lists which lines appear in one but not the other, plus identical/length
+information. This is a content comparison rather than a positional hunk diff.
+
+**Parameters**: `left` (string, required), `right` (string, required), `limit` (integer, default 100,
+max 1000 — lines listed per side).
+
+### `andromcp_csv_to_json`
+Parses CSV into JSON, handling quoted fields, embedded delimiters and embedded newlines.
+
+**Parameters**: `csv` (string, required), `delimiter` (string, default a comma),
+`has_header` (boolean, default true), `limit` (integer, default 200, max 5000).
+**Errors**: `InvalidParams` when the input contains no rows.
+
+---
+
+## 22. Shell & Terminal Tools
+
+The escape hatch that turns "the tools I shipped" into "the whole device". Everything else here is a
+narrow, purpose-built capability, which means anything nobody wrapped would be impossible; these
+tools remove that ceiling by running commands, reading the system's own interfaces, and keeping
+interactive shells alive between calls. Prefer a dedicated tool when one exists — it is safer and
+returns structured data — and treat these as the general fallback.
+
+**Service**: `ProcessBuilder`, `/system/bin/sh`, `su`, `/proc`, `getprop`, `logcat`
+**Permission**: none for the unprivileged tools. `su_exec` requires the device to be rooted and the
+user to approve the superuser prompt; `check_root` reports both facts before you rely on it.
+**Untrusted content**: all output is device-controlled text, wrapped with the
+`UNTRUSTED_CONTENT_WARNING` and capped at 50000 characters per call.
+
+All thirteen tools are individually toggleable under **Settings → MCP Tools → Shell & Terminal**.
+
+### `andromcp_shell_exec`
+Runs a shell command through `sh -c` as this app's own user and returns stdout, stderr and the exit
+code. A non-zero exit code is data, not an error; a command that outlives its timeout is killed and
+reported with `timed_out: true`.
+
+**Parameters**: `command` (string, required), `timeout_seconds` (integer, default 20, max 180),
+`working_directory` (string, default the app's files dir).
+
+### `andromcp_su_exec`
+Runs a command as root through `su -c`, for work the app's own permissions cannot do: writing under
+`/system`, changing protected settings, reading another app's private data, rebooting.
+
+**Parameters**: `command` (string, required), `timeout_seconds` (integer, default 20, max 180).
+**Errors**: `ActionFailed` when `su` produces no output, which usually means an unrooted device or a
+root prompt still waiting on screen.
+
+### `andromcp_check_root`
+Reports whether a `su` binary exists and whether `su -c id` actually returns uid 0. Call it before
+`su_exec` whenever the outcome depends on privileges.
+
+**Parameters**: none.
+
+### `andromcp_list_processes`
+Lists running processes with a case-insensitive `filter` over any column, newest formats preferred
+and `ps -A` as a fallback.
+
+**Parameters**: `filter` (string, optional), `limit` (integer, default 50, max 500).
+
+### `andromcp_get_system_properties`
+Reads Android system properties (`getprop`) as a key/value object, optionally narrowed by a
+case-insensitive filter on the property name — build fingerprint, SoC, bootloader state, emulator
+flags.
+
+**Parameters**: `filter` (string, optional).
+
+### `andromcp_get_environment`
+Returns the process environment plus a runtime snapshot: variables, processor count, memory limits
+and usage, Java/VM/architecture names.
+
+**Parameters**: none.
+
+### `andromcp_read_logcat`
+Dumps the most recent log lines (`logcat -d -t N`) and can keep only lines containing `filter`.
+Unprivileged apps receive their own uid's entries; use `su_exec` for the full buffer.
+
+**Parameters**: `lines` (integer, default 200, max 4000), `filter` (string, optional).
+
+### `andromcp_read_system_file`
+Reads a file by absolute device path, capped at `max_bytes` — for `/proc`, `/sys` and
+`/data/local/tmp`, which the storage providers cannot reach.
+
+**Parameters**: `path` (string, required, must be absolute), `max_bytes` (integer, default 65536, max
+1048576).
+**Errors**: `InvalidParams` for a relative path, a missing file or a directory; `ActionFailed` when
+this app's uid has no read access.
+
+### `andromcp_terminal_open`
+Opens a long-lived interactive shell and returns its `session_id`. At most four sessions can be open
+at once, and all of them end when the server stops.
+
+**Parameters**: `shell` (string, default `/system/bin/sh`), `working_directory` (string, optional).
+
+### `andromcp_terminal_write`
+Writes text to a session's standard input, with a trailing newline unless `newline` is false (pass
+false to feed a partial line or a lone `q`).
+
+**Parameters**: `session_id` (string, required), `input` (string, required), `newline` (boolean,
+default true).
+
+### `andromcp_terminal_read`
+Returns everything the session printed since the previous read and forgets it, so each call reports
+only new output. `wait_ms` waits for output that has not appeared yet.
+
+**Parameters**: `session_id` (string, required), `wait_ms` (integer, default 0, max 30000).
+
+### `andromcp_terminal_list`
+Lists the open sessions with their id, liveness, pid, age, characters waiting and characters read so
+far.
+
+**Parameters**: none.
+
+### `andromcp_terminal_close`
+Closes stdin and terminates the session's process, reporting how many unread characters were
+discarded.
+
+**Parameters**: `session_id` (string, required).
+
+---
+
+## 23. Media Library Tools
+
+Everything in the media library — photos, videos, recordings — is indexed by `MediaStore`, which is
+a better handle than a path: a stable id, a MIME type, dimensions, duration, a bucket, and a
+`content://` URI other apps accept. These tools browse, search, inspect, delete, rescan and play
+media, and control per-stream volume.
+
+**Service**: `MediaStore`, `MediaScannerConnection`, `MediaPlayer`, `AudioManager`
+**Permission**: `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO` and `READ_MEDIA_AUDIO` (Android 13+) for the
+listing tools; each error names the exact missing grant.
+
+All ten tools are individually toggleable under **Settings → MCP Tools → Media Library**.
+
+### `andromcp_list_media`
+Lists media items with id, name, size, MIME type, relative path and a ready-to-use `content://` URI.
+
+**Parameters**: `type` (string, default `any`; also `image`, `video`, `audio`), `limit` (integer,
+default 50, max 500), `sort` (string, default `newest`; also `oldest`, `largest`, `smallest`, `name`).
+
+### `andromcp_search_media`
+Finds media whose file name or folder path contains `query`, newest first.
+
+**Parameters**: `query` (string, required), `type` (string, default `any`), `limit` (integer, default
+50, max 500).
+
+### `andromcp_get_media_info`
+Returns every metadata column MediaStore holds for one item: name, size, MIME type, duration,
+dimensions, dates, paths and owning package. Address it by `uri`, or by `id` plus `type`.
+
+**Parameters**: `uri` (string, optional), `id` (integer, optional), `type` (string, required with
+`id`).
+
+### `andromcp_delete_media`
+Deletes a media item by its `content://` URI. Items owned by another app need a user-confirmed
+dialog that a tool cannot raise, and the error says so.
+
+**Parameters**: `uri` (string, required).
+
+### `andromcp_scan_media_path`
+Asks the media scanner to index a file at an absolute path so it appears in the gallery and in
+MediaStore queries.
+
+**Parameters**: `path` (string, required).
+**Errors**: `ActionFailed` when the file cannot be read.
+
+### `andromcp_play_media`
+Plays one audio or video track from a `content://` URI, an http(s) URL or an absolute path. One track
+at a time: a second call replaces the first.
+
+**Parameters**: `source` (string, required), `loop` (boolean, default false), `volume` (number,
+default 1.0).
+
+### `andromcp_stop_media`
+Stops and releases the player. Safe to call when nothing is playing — it reports
+`was_playing: false`.
+
+**Parameters**: none.
+
+### `andromcp_get_playback_state`
+Reports whether this app is playing, the source, position and duration in milliseconds, volume and
+loop state.
+
+**Parameters**: none.
+
+### `andromcp_set_stream_volume`
+Sets one audio stream to a percentage of its maximum and reports the resulting index.
+
+**Parameters**: `stream` (string, required: `media`, `ring`, `notification`, `alarm`, `call`,
+`system` or `dtmf`), `percent` (integer, required, 0-100).
+
+### `andromcp_list_media_directories`
+Summarizes the library by folder with item counts, busiest first — orientation before a large
+search.
+
+**Parameters**: `type` (string, default `any`), `limit` (integer, default 50, max 500).
+
+---
+
+## 24. Audio Capture Tools
+
+Hearing is the half of the device an agent normally cannot reach. These tools capture it: record
+meetings or voice memos to a file, measure the noise floor before a task that depends on listening,
+inspect the available microphones, and clean up afterwards.
+
+**Service**: `MediaRecorder`, `AudioRecord`, `AudioManager`
+**Permission**: `RECORD_AUDIO` (checked per call, naming the permission when missing). Recordings are
+written to the app's own external files directory, so no storage permission is involved.
+
+All seven tools are individually toggleable under **Settings → MCP Tools → Audio Capture**.
+
+### `andromcp_start_audio_recording`
+Starts recording AAC audio to `.m4a`, returning the path. Without `duration_seconds` it keeps
+recording until stopped; with a short duration it stops automatically before returning, and longer
+durations are left running so the call cannot time out.
+
+**Parameters**: `name` (string, default `recording`), `duration_seconds` (integer, default 0).
+
+### `andromcp_stop_audio_recording`
+Finishes the recording and reports the final path and size. Reports `stopped: false` when nothing was
+recording.
+
+**Parameters**: none.
+
+### `andromcp_get_recording_state`
+Reports whether a recording is running, its file, elapsed time and bytes written so far.
+
+**Parameters**: none.
+
+### `andromcp_list_recordings`
+Lists this app's recordings, newest first, with path, size and modification time.
+
+**Parameters**: `limit` (integer, default 50, max 500).
+
+### `andromcp_delete_recording`
+Deletes one of this app's recordings by file name.
+
+**Parameters**: `file_name` (string, required).
+
+### `andromcp_measure_noise_level`
+Samples the microphone and reports peak/average amplitude, dBFS and a plain assessment such as
+"quiet" or "normal speech level". Audio is measured and discarded, never saved.
+
+**Parameters**: `duration_ms` (integer, default 2000, min 200, max 30000).
+
+### `andromcp_get_microphone_info`
+Describes audio capture: input devices with types and sample rates, whether `RECORD_AUDIO` is
+granted, whether the microphone is muted, and the current audio mode.
+
+**Parameters**: none.
+
+---
+
+## 25. Security & Vault Tools
+
+An agent that handles credentials or personal text needs somewhere safe to put them and a way to
+prove it produced the bytes it claims. These tools generate and manage keys in the hardware-backed
+Android KeyStore, sign and verify, encrypt and decrypt, keep named secrets encrypted at rest, and
+generate and grade passwords.
+
+**Service**: `AndroidKeyStore`, `Cipher` (AES-256-GCM), `Signature`, PBKDF2-HMAC-SHA256,
+`SecureRandom`, `SharedPreferences`
+**Permission**: none. Private key material is generated inside the KeyStore and can never be
+exported.
+
+All thirteen tools are individually toggleable under **Settings → MCP Tools → Security & Vault**.
+
+### `andromcp_encrypt_text`
+Encrypts text with AES-256-GCM. Without a passphrase it seals the payload with a device KeyStore key;
+with one it derives the key from the passphrase and a unique random salt.
+
+**Parameters**: `content` (string, required), `passphrase` (string, optional), `alias` (string,
+default `andromcp_vault_key`).
+
+### `andromcp_decrypt_text`
+Decrypts a payload from `encrypt_text`. The payload prefix says which mode it uses, and a wrong
+passphrase fails authentication rather than returning garbage.
+
+**Parameters**: `payload` (string, required), `passphrase` (string, required for passphrase payloads).
+
+### `andromcp_keystore_generate_key`
+Creates a key inside the Android KeyStore. RSA for signing, EC for smaller signing keys, AES-256 for
+symmetric encryption.
+
+**Parameters**: `alias` (string, required), `algorithm` (string, default `RSA`; also `EC`, `AES`),
+`key_size` (integer, default 2048, 2048-4096), `curve` (string, default `secp256r1`).
+
+### `andromcp_keystore_list_keys`
+Lists the KeyStore keys with alias, whether each is a key pair, public-key algorithm and creation
+date. Private material is never returned.
+
+**Parameters**: none.
+
+### `andromcp_keystore_delete_key`
+Permanently removes a key. Anything sealed with it becomes unreadable, including stored secrets.
+
+**Parameters**: `alias` (string, required).
+
+### `andromcp_keystore_sign`
+Signs text (or base64 data) with a KeyStore private key and returns the base64 signature — a
+tamper-evident receipt the holder can check later.
+
+**Parameters**: `alias` (string, required), `content` (string, required), `input_encoding` (string,
+default `utf8`; also `base64`).
+
+### `andromcp_keystore_verify`
+Checks a signature against the content it should cover, returning `valid: true` only on an exact
+match.
+
+**Parameters**: `alias` (string, required), `content` (string, required), `signature` (string,
+required), `input_encoding` (string, default `utf8`).
+
+### `andromcp_secret_store`
+Saves a named secret encrypted with a KeyStore key, returning only metadata. Reusing a name
+overwrites that secret.
+
+**Parameters**: `name` (string, required), `value` (string, required).
+
+### `andromcp_secret_get`
+Reads a stored secret back in plaintext, for the moment a credential is actually needed.
+
+**Parameters**: `name` (string, required).
+
+### `andromcp_secret_delete`
+Permanently deletes a stored secret.
+
+**Parameters**: `name` (string, required).
+
+### `andromcp_secret_list`
+Lists the stored secret names with creation and update times and ciphertext sizes — never their
+values.
+
+**Parameters**: none.
+
+### `andromcp_generate_password`
+Generates cryptographically random passwords and reports the entropy each one carries.
+
+**Parameters**: `length` (integer, default 20, 8-128), `count` (integer, default 1, max 20),
+`symbols` (boolean, default true), `digits` (boolean, default true), `exclude_ambiguous` (boolean,
+default false).
+
+### `andromcp_password_strength`
+Estimates a password's strength without sending it anywhere: length, character classes, effective
+alphabet size, entropy in bits, a plain assessment and concrete suggestions.
+
+**Parameters**: `password` (string, required).
+
+---
+
+## 26. App Management Plus Tools
+
+The launcher shows icons; the package manager shows every app, component, permission and signature.
+These tools expose that view: enumerate, search and profile apps, read their usage, launch, stop,
+uninstall and install them, and ask the system which app handles a given intent.
+
+**Service**: `PackageManager`, `PackageInstaller`, `ActivityManager`, `UsageStatsManager`
+**Permission**: `QUERY_ALL_PACKAGES` (declared) and `KILL_BACKGROUND_PROCESSES` for the inventory and
+stop tools; `PACKAGE_USAGE_STATS` ("Usage access") for usage statistics; installing also needs the
+user's one-time "install unknown apps" approval and the system confirmation dialog.
+
+All fourteen tools are individually toggleable under **Settings → MCP Tools → App Management Plus**.
+
+### `andromcp_list_installed_apps`
+Lists installed apps with package name, label, version, install dates, target SDK and APK size.
+System apps are hidden unless `include_system` is true.
+
+**Parameters**: `include_system` (boolean, default false), `limit` (integer, default 100, max 1000).
+
+### `andromcp_search_apps`
+Finds apps by a case-insensitive substring of the package name or label — the first step whenever a
+task names an app in human terms.
+
+**Parameters**: `query` (string, required), `include_system` (boolean, default true), `limit`
+(integer, default 50, max 1000).
+
+### `andromcp_get_app_info`
+Profiles one app: version and code, uid, target and minimum SDK, enabled/stopped/debuggable/system
+flags, APK/data/native paths, size, installer, install and update times, and the SHA-256 of its
+signing certificate.
+
+**Parameters**: `package_name` (string, required).
+
+### `andromcp_get_app_permissions`
+Lists every permission an app declares and whether each is currently granted.
+
+**Parameters**: `package_name` (string, required).
+
+### `andromcp_get_app_components`
+Lists the activities, services, receivers and providers an app declares, by class name.
+
+**Parameters**: `package_name` (string, required), `limit` (integer, default 200, max 1000).
+
+### `andromcp_get_app_signature`
+Returns an app's signing certificates with SHA-256 and SHA-1 fingerprints, validity dates and
+issuer — the only reliable identity an app has.
+
+**Parameters**: `package_name` (string, required).
+
+### `andromcp_get_app_usage_stats`
+Reports foreground time per app over the last few days, longest first. Needs "Usage access", and the
+error says so when it is missing.
+
+**Parameters**: `days` (integer, default 1, max 30), `limit` (integer, default 30, max 200).
+
+### `andromcp_launch_app`
+Starts an app's launcher activity, or a named activity, and fails loudly when nothing can be started.
+
+**Parameters**: `package_name` (string, required), `activity` (string, optional).
+
+### `andromcp_force_stop_app`
+Kills an app's background processes. Refuses to target this server's own package. A soft stop: a
+foreground service can bring the process back, in which case `su_exec` with `am force-stop` is
+definitive.
+
+**Parameters**: `package_name` (string, required).
+
+### `andromcp_open_app_settings`
+Opens the system "App info" screen for one app, where permissions, notifications and storage can be
+changed by the user.
+
+**Parameters**: `package_name` (string, required).
+
+### `andromcp_uninstall_app`
+Starts uninstalling an app by opening Android's confirmation dialog; the user has to accept it.
+
+**Parameters**: `package_name` (string, required).
+
+### `andromcp_install_apk`
+Installs an APK already present on the device by staging it through `PackageInstaller`. Android shows
+its own confirmation dialog, so the result arrives later — read it with `get_install_status`.
+
+**Parameters**: `path` (string, required, absolute).
+
+### `andromcp_get_install_status`
+Reports the outcome of the most recent `install_apk`: whether the system has reported back, the
+status code, the system message and the affected package.
+
+**Parameters**: none.
+
+### `andromcp_query_intent_handlers`
+Lists the apps that can handle an intent, optionally narrowed by a data URI or MIME type, so the
+agent can predict the screen it is about to cause.
+
+**Parameters**: `action` (string, required), `data_uri` (string, optional), `mime_type` (string,
+optional), `limit` (integer, default 20, max 200).
+
+---
+
+## 27. Bluetooth & USB Tools
+
+`get_bluetooth_state` says whether Bluetooth is on; these tools do the work around it: scan for
+Bluetooth LE devices and read the results, pair and unpair, see what is connected over which profile,
+and inspect wired USB devices.
+
+**Service**: `BluetoothAdapter`, `BluetoothLeScanner`, `BluetoothManager`, `UsbManager`
+**Permission**: `BLUETOOTH_CONNECT` for adapter and device reads, `BLUETOOTH_SCAN` for scanning (and
+on some builds a granted location permission). USB devices are visible without a grant; claiming one
+from another app requires the user's consent dialog and is not offered here.
+
+All eleven tools are individually toggleable under **Settings → MCP Tools → Bluetooth & USB**.
+
+### `andromcp_get_bluetooth_summary`
+Reports the adapter's state, name and address, LE and filtering support, whether a scan is running,
+and every paired device with its bond state.
+
+**Parameters**: none.
+
+### `andromcp_start_bluetooth_scan`
+Starts a Bluetooth LE scan, waits briefly and returns devices ordered by signal strength. By default
+it stops the scan before returning.
+
+**Parameters**: `filter` (string, optional — matched against name or address), `wait_seconds`
+(integer, default 5, max 25), `stop_after` (boolean, default true).
+
+### `andromcp_get_bluetooth_scan_results`
+Returns everything the current or most recent scan has seen, strongest first, with address, name,
+RSSI, bond state and last-seen time.
+
+**Parameters**: `include_bonded` (boolean, default true), `limit` (integer, default 50, max 500).
+
+### `andromcp_stop_bluetooth_scan`
+Stops the scan. Worth doing: an active scan keeps the radio at full power.
+
+**Parameters**: none.
+
+### `andromcp_pair_bluetooth_device`
+Starts pairing with a device by MAC address. Idempotent — an already-paired device reports
+`already_paired: true`.
+
+**Parameters**: `address` (string, required).
+
+### `andromcp_unpair_bluetooth_device`
+Removes a pairing and any connection over it. The target must currently be paired.
+
+**Parameters**: `address` (string, required).
+
+### `andromcp_get_bluetooth_bond_state`
+Reports one device's pairing state (`none`, `bonding`, `bonded`), name, transport type and known
+service UUID count — useful for polling until a pairing settles.
+
+**Parameters**: `address` (string, required).
+
+### `andromcp_get_connected_bluetooth_devices`
+Lists connected devices by profile: `a2dp` (audio playback), `headset` (calls), `gatt` (peripherals).
+Answers "where is the sound going?".
+
+**Parameters**: `profile` (string, default `all`; also `a2dp`, `headset`, `gatt`).
+
+### `andromcp_open_bluetooth_settings`
+Opens the system Bluetooth settings screen, for the actions only a user can take: turning the radio
+on, or completing a passkey pairing.
+
+**Parameters**: none.
+
+### `andromcp_list_usb_devices`
+Lists attached USB devices with vendor and product ids, names, interface count and whether this app
+already holds access.
+
+**Parameters**: none.
+
+### `andromcp_get_usb_device_detail`
+Returns everything the system exposes about one USB device, including each interface's class and
+endpoint count.
+
+**Parameters**: `device_name` (string, required).
+
+---
+
+## 28. Notification Extras Tools
+
+The screen is not always the right place for an answer: a notification survives leaving the app,
+reaches a watch and the lock screen, and carries a title, body and priority the user reads at a
+glance. These tools post, cancel and manage this app's own notifications and the channels they
+arrive through. Other apps' notifications are read-only, through the notification-listener tools.
+
+**Service**: `NotificationManagerCompat`, `NotificationManager`, `NotificationChannel`
+**Permission**: `POST_NOTIFICATIONS` (runtime) plus notifications enabled for the app; both are
+checked and reported rather than assumed.
+
+All nine tools are individually toggleable under **Settings → MCP Tools → Notification Extras**.
+
+### `andromcp_post_notification`
+Posts a notification with a title and body and returns the id needed to cancel it.
+
+**Parameters**: `title` (string, required), `text` (string, optional), `id` (integer, default
+random), `channel_id` (string, default `andromcp_agent`), `importance` (string, default `default`;
+also `min`, `low`, `high`).
+
+### `andromcp_cancel_notification`
+Dismisses one of this app's notifications by id.
+
+**Parameters**: `id` (integer, required).
+
+### `andromcp_cancel_all_notifications`
+Clears every notification this app has posted; other apps' notifications are untouched.
+
+**Parameters**: none.
+
+### `andromcp_list_notification_channels`
+Lists this app's channels with importance, sound, vibration, badge and blockability — the way to
+diagnose a notification that stayed silent.
+
+**Parameters**: none.
+
+### `andromcp_create_notification_channel`
+Creates a channel so different message kinds can be silenced independently. Importance is fixed at
+creation, so an existing channel is left untouched and reported as `already_existed: true`.
+
+**Parameters**: `channel_id` (string, required), `name` (string, required), `description` (string,
+optional), `importance` (string, default `default`), `vibration` (boolean, default true).
+
+### `andromcp_delete_notification_channel`
+Deletes a channel this app created, for retuning importance by recreating it.
+
+**Parameters**: `channel_id` (string, required).
+
+### `andromcp_get_notification_policy`
+Reports whether notifications are enabled, whether the permission is granted, whether DND access is
+available, the current interruption filter and whether a full-screen intent is allowed.
+
+**Parameters**: none.
+
+### `andromcp_check_notification_permission`
+A focused yes/no on whether a notification can be posted right now, with the reason and the exact
+next step when it cannot.
+
+**Parameters**: none.
+
+### `andromcp_open_notification_settings`
+Opens this app's notification settings screen, where the permission and per-channel switches live.
+
+**Parameters**: none.
+
+---
+
+## 29. Web & Feed Tools
+
+`http_request` returns raw bytes; these tools turn the web into something readable: a page as text
+with its title, its links, an API response with its field names, a feed as headlines, a weather
+answer, and a file downloaded where other tools can use it.
+
+**Service**: `HttpURLConnection`, Open-Meteo (keyless weather and geocoding)
+**Permission**: `INTERNET` only. Network content is always returned as untrusted.
+
+All seven tools are individually toggleable under **Settings → MCP Tools → Web & Feeds**.
+
+### `andromcp_fetch_webpage`
+Fetches a URL and returns the page as text with its title, final URL after redirects and content
+type. Scripts and styles are dropped and markup flattened; `include_html` returns the raw markup.
+
+**Parameters**: `url` (string, required), `max_chars` (integer, default 20000, max 200000),
+`include_html` (boolean, default false), `timeout_seconds` (integer, default 15, max 60).
+
+### `andromcp_extract_links`
+Lists the links on a page as absolute URLs with their visible text, marking the external ones.
+
+**Parameters**: `url` (string, required), `limit` (integer, default 50, max 500), `query` (string,
+optional).
+
+### `andromcp_fetch_json`
+Fetches a JSON endpoint and reports whether the body parses plus the names of its top-level fields —
+the exact paths to use with `json_query`.
+
+**Parameters**: `url` (string, required), `max_chars` (integer, default 100000, max 500000).
+
+### `andromcp_check_url_status`
+Checks whether a URL responds, using HEAD so almost no data moves, and reports status, content type,
+latency and whether it redirects.
+
+**Parameters**: `url` (string, required).
+
+### `andromcp_get_rss_feed`
+Reads an RSS or Atom feed and returns its items as structured entries: title, link, publication date
+and summary.
+
+**Parameters**: `url` (string, required), `limit` (integer, default 20, max 200).
+
+### `andromcp_get_weather`
+Returns current conditions and a daily forecast for a place — temperature, feels-like, humidity,
+precipitation, wind, a plain-language condition, and high/low with rain probability per day.
+
+**Parameters**: `location` (string, optional — geocoded), `latitude` (number, optional),
+`longitude` (number, optional), `days` (integer, default 1, max 7).
+
+### `andromcp_download_to_workspace`
+Downloads a URL into the app's own files directory with a bounded size, returning the absolute path
+so other tools can use the file. Needs no storage permission; use `download_from_url` for the user's
+own folders.
+
+**Parameters**: `url` (string, required), `file_name` (string, optional), `subdirectory` (string,
+default `downloads`).
+
+---
+
+## 30. Agent Memory Tools
+
+Every tool call is stateless: what the agent learned is gone when the call returns. That works for
+one-shot tasks and fails for anything longer. These tools give the agent a place to write things
+down, on the device, surviving both the call and a restart of the server. Entries are grouped into
+namespaces, values are bounded plain text, and secrets do not belong here — use the Security & Vault
+tools, which encrypt them.
+
+**Service**: `SharedPreferences` (`andromcp_agent_memory`)
+**Permission**: none.
+
+All six tools are individually toggleable under **Settings → MCP Tools → Agent Memory**.
+
+### `andromcp_memory_set`
+Writes a named value into persistent memory. Reuse the same key to update it.
+
+**Parameters**: `key` (string, required), `value` (string, required, max 64000 characters),
+`namespace` (string, default `default`), `tags` (string, optional, comma-separated).
+
+### `andromcp_memory_get`
+Reads one remembered value with its timestamps, tags and size. An unknown key is a clear error naming
+the search tools.
+
+**Parameters**: `key` (string, required), `namespace` (string, default `default`).
+
+### `andromcp_memory_list`
+Lists the keys in a namespace with sizes, tags and timestamps, plus every namespace that exists.
+Values are omitted unless `include_values` is true.
+
+**Parameters**: `namespace` (string, optional), `prefix` (string, optional), `limit` (integer,
+default 50, max 500), `include_values` (boolean, default false).
+
+### `andromcp_memory_search`
+Searches every namespace for a case-insensitive substring, matching keys, tags and values, and
+returns the full matching entries.
+
+**Parameters**: `query` (string, required), `limit` (integer, default 20, max 200).
+
+### `andromcp_memory_delete`
+Removes one entry, failing loudly when it does not exist so "already cleaned up" is never confused
+with "just deleted it".
+
+**Parameters**: `key` (string, required), `namespace` (string, default `default`).
+
+### `andromcp_memory_clear`
+Empties one namespace in a single call. The namespace must be named explicitly and must currently
+hold something, so there is no way to wipe memory by accident.
+
+**Parameters**: `namespace` (string, required).

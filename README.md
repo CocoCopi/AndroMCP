@@ -43,9 +43,13 @@ Once connected, an AI model can read UI elements, tap buttons, type text, swipe,
 - Auto-start on boot
 - Remote access tunnels via Cloudflare Quick Tunnels or ngrok (public HTTPS URL)
 
-### 67 MCP Tools across 15 Categories
+### 234 MCP Tools across 30 Categories
 
 Screen introspection, system actions, touch actions, gestures, node actions, text input, utilities, file operations, app management, camera, intents, notifications, location, sharing, and device services (text-to-speech, volume, media playback, battery, flashlight, device identity, alarms, timers, dialer).
+
+The newer bundles push the agent well past "drive the UI": **Communication** (SMS, call log, contacts, calendar, e-mail composer), **Network** (drives arbitrary HTTP requests, DNS, reachability and TCP port checks, Wi-Fi scanning), **Hardware** (the sensor suite, battery and thermal detail, memory, storage, SoC identity, vibration, NFC, Bluetooth, display geometry, audio routing), **Device Settings** (brightness, screen timeout, rotation lock, font scale, ringer, Do Not Disturb, plus deep links into any system settings page), **Workspace Files** (a permission-free private filesystem with copy, move, hash, search and zip), and **Data & Text** (base64, digests, HMAC, UUIDs, JSON queries, regular expressions, CSV parsing).
+
+The newest bundles remove the ceiling entirely. **Shell & Terminal** runs any command the app's uid may run, runs commands as root on a rooted device, dumps system properties, reads logcat and arbitrary readable files, and keeps interactive shell sessions alive across calls. **Media Library** and **Audio Capture** browse, inspect, delete and play the media store, and record, measure and play back audio. **Security & Vault** manages Android KeyStore keys, signs and verifies, encrypts and decrypts (device-held key or passphrase), stores secrets encrypted at rest, and generates and grades passwords. **App Management** profiles every installed app, hashes its signing certificate, reads usage statistics, launches, stops, uninstalls and installs APKs. **Bluetooth & USB** scans, pairs, unpairs, reports connected profiles and inspects wired USB devices. **Notifications** posts, cancels and manages channels and policy. **Web & Feeds** reads pages as text, extracts links, fetches APIs and feeds, answers weather questions and downloads files. **Agent Memory** gives the agent persistent storage that survives restarts.
 
 All tool names use the `andromcp_` prefix by default (e.g., `andromcp_tap`). When a device slug is configured (e.g., `pixel7`), the prefix becomes `andromcp_pixel7_` (e.g., `andromcp_pixel7_tap`).
 
@@ -66,7 +70,7 @@ See [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md) for the full tool reference with inpu
 
 | Feature | This project | [mobile-mcp] | [Android-MCP] | [android-mcp-server] | [adb-mcp] | [droidrun-mcp] |
 |---------|:-:|:-:|:-:|:-:|:-:|:-:|
-| MCP tools | 67 | 21 | 11 | 5 | 10 | 11 |
+| MCP tools | 234 | 21 | 11 | 5 | 10 | 11 |
 | Runs on the phone (no ADB) | :white_check_mark: | :x: | :x: | :x: | :x: | :x: |
 | Action latency | 10-100 ms | 1-4 s | 1-4 s | 1-4 s | 1-4 s | 1-4 s |
 | Works over the internet | :white_check_mark: | :x: | :x: | :x: | :x: | :x: |
@@ -138,7 +142,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for full build requirements and instructi
    - **Accessibility Service** — **required.** Powers UI introspection, action execution, and screenshots; nothing works without it.
      - **If the toggle is greyed out** (Android 13+, common on Samsung/One UI for apps installed from an APK): this is Android's "Restricted settings" protection. A dialog reads *"Restricted setting — For your security, this setting is currently unavailable."* To unblock it, go to **Settings → Apps → AndroMCP → App info**, tap the **⋮ menu** (top-right), choose **Allow restricted settings**, confirm with your PIN/pattern/biometric, then enable the Accessibility Service. (Play Store / F-Droid installs are not affected.)
    - **Notifications** — **optional** (recommended for OAuth). OAuth sign-in approvals (Claude.ai / Claude Desktop, ChatGPT, or any third-party OAuth client) arrive as heads-up notifications you tap to confirm the 2-digit code and approve. It is **no longer required** for OAuth login, though: if you don't grant this permission, pending requests still appear as a **card on the app's Server screen** that you tap to review and approve/deny. The **Event Channel** push feature — e.g. pushing device events to Claude Code — runs as a foreground service that posts its status notification through this permission on Android 13+.
-   - **Other permissions** (optional) — Camera, Microphone, and Location enable their corresponding MCP tools. The app works without them; only the dependent features are disabled until granted. See the [Permissions Reference](#permissions-reference) below for the complete list.
+   - **Other permissions** (optional) — Camera, Microphone, Location, Messages, Call log, Contacts, Calendar and Bluetooth enable their corresponding MCP tools, and the two **special access** grants ("Modify system settings" and "Do Not Disturb access") enable the device-settings tools. The app works without any of them; only the dependent features are disabled until granted, and every affected tool fails with a message naming the permission and the screen to open. See the [Permissions Reference](#permissions-reference) below for the complete list.
    - **Storage locations** — configure in Settings > Storage if you plan to use the file tools (automatic locations like Downloads, plus custom locations via SAF).
 
 3. **Start the server.** Go back to the **Server tab** and tap **Start**.
@@ -517,9 +521,9 @@ The app declares the permissions below. **Normal** permissions are granted autom
 | `KILL_BACKGROUND_PROCESSES` | Normal | Stop background apps via app-management tools |
 | `ACCESS_WIFI_STATE` | Normal | Read WiFi state for the Event Channel |
 | `CHANGE_WIFI_STATE` | Normal | Manage WiFi for the Event Channel |
-| `POST_NOTIFICATIONS` | Runtime | Show the foreground service notification (Android 13+) |
+| `POST_NOTIFICATIONS` | Runtime | Show the foreground service notification (Android 13+) and post agent notifications |
 | `CAMERA` | Runtime | Camera photo/video MCP tools |
-| `RECORD_AUDIO` | Runtime | Audio capture for camera video tools |
+| `RECORD_AUDIO` | Runtime | Audio capture for camera video tools, plus the recording and noise-level tools |
 | `ACCESS_FINE_LOCATION` | Runtime | Location tools and geofence events |
 | `ACCESS_COARSE_LOCATION` | Runtime | Approximate location |
 | `ACCESS_BACKGROUND_LOCATION` | Runtime | Location/geofence events while the app is in the background |
@@ -527,6 +531,20 @@ The app declares the permissions below. **Normal** permissions are granted autom
 | `READ_MEDIA_IMAGES` | Runtime | "All files" mode for built-in image storage locations (Android 13+) |
 | `READ_MEDIA_VIDEO` | Runtime | "All files" mode for built-in video storage locations (Android 13+) |
 | `READ_MEDIA_AUDIO` | Runtime | "All files" mode for built-in audio storage locations (Android 13+) |
+| `SEND_SMS` | Runtime | Sending text messages via the `send_sms` tool |
+| `READ_SMS` | Runtime | Reading and searching text messages via the communication tools |
+| `READ_CALL_LOG` | Runtime | Reading the call log via the `list_call_log` tool |
+| `READ_CONTACTS` | Runtime | Looking up contacts and their details |
+| `WRITE_CONTACTS` | Runtime | Creating contacts |
+| `READ_CALENDAR` | Runtime | Listing calendars and calendar events |
+| `WRITE_CALENDAR` | Runtime | Creating and deleting calendar events |
+| `BLUETOOTH_CONNECT` | Runtime | Reading Bluetooth state and paired devices (Android 12+) |
+| `VIBRATE` | Normal | Physical feedback via the `vibrate` tool |
+| `BLUETOOTH_SCAN` | Runtime | Bluetooth LE scanning (Android 12+) |
+| `REQUEST_INSTALL_PACKAGES` | Normal | Install APKs through the `install_apk` tool (still needs the user's one-time "install unknown apps" approval) |
+| `PACKAGE_USAGE_STATS` | Special access | "Usage access": per-app foreground time for `get_app_usage_stats` |
+| `WRITE_SETTINGS` | Special access | "Modify system settings": brightness, screen timeout, rotation lock and font scale |
+| `ACCESS_NOTIFICATION_POLICY` | Special access | "Do Not Disturb access": ringer mode and Do Not Disturb control |
 | Accessibility Service | Special access | UI introspection, action execution, and screenshots — **required** for core functionality |
 | Notification Listener | Special access | Reading and managing notifications via notification tools |
 

@@ -137,7 +137,7 @@ The typical startup flow: User opens app → enables Accessibility Service in An
   - `services/mcp/` — `McpServerService.kt`, `BootCompletedReceiver.kt`, `AdbConfigHandler.kt`, `AdbConfigReceiver.kt`, `AdbServiceTrampolineActivity.kt`
   - `services/tunnel/` — `TunnelProvider.kt`, `TunnelManager.kt`, `CloudflareTunnelProvider.kt`, `CloudflaredBinaryResolver.kt`, `AndroidCloudflareBinaryResolver.kt`, `NgrokTunnelProvider.kt`
   - `mcp/` — `McpServer.kt`, `McpStatelessTransport.kt`, `McpToolException.kt`, `CertificateManager.kt`
-  - `mcp/tools/` — `McpToolUtils.kt`, `TreeFingerprint.kt`, `ScreenIntrospectionTools.kt`, `TouchActionTools.kt`, `NodeActionTools.kt`, `TextInputTools.kt`, `SystemActionTools.kt`, `GestureTools.kt`, `UtilityTools.kt`, `FileTools.kt`, `AppManagementTools.kt`, `CameraTools.kt`, `LocationTools.kt`
+  - `mcp/tools/` — `McpToolUtils.kt`, `TreeFingerprint.kt`, `ScreenIntrospectionTools.kt`, `TouchActionTools.kt`, `NodeActionTools.kt`, `TextInputTools.kt`, `SystemActionTools.kt`, `GestureTools.kt`, `UtilityTools.kt`, `FileTools.kt`, `AppManagementTools.kt`, `CameraTools.kt`, `LocationTools.kt`, plus the extended bundles: `CommsTools.kt`, `NetworkTools.kt`, `HardwareTools.kt`, `DeviceSettingsTools.kt`, `DeviceServiceTools.kt`, `WorkspaceTools.kt`, `DataTools.kt`, `ShellTools.kt`, `TerminalTools.kt`, `MediaTools.kt`, `AudioCaptureTools.kt`, `CryptoVaultTools.kt`, `PackageTools.kt`, `ApkInstallReceiver.kt`, `BluetoothExtrasTools.kt`, `NotificationExtrasTools.kt`, `WebTools.kt`, `AgentMemoryTools.kt`
   - `mcp/auth/` — `BearerTokenAuth.kt`
   - `ui/` — `MainActivity.kt`
   - `ui/theme/` — `Theme.kt`, `Color.kt`, `Type.kt`
@@ -199,7 +199,9 @@ Tool errors are returned as `CallToolResult(isError = true)` with an error messa
 
 ## MCP Tools Specification
 
-The MCP server exposes 67 tools across 15 categories. For full JSON-RPC schemas, detailed usage examples, and implementation notes, see [MCP_TOOLS.md](MCP_TOOLS.md).
+The MCP server exposes 234 tools across 30 categories. For full JSON-RPC schemas, detailed usage examples, and implementation notes, see [MCP_TOOLS.md](MCP_TOOLS.md).
+
+Alongside the screen-driving tools, the server now covers the device itself: shell and root command execution with long-lived interactive sessions, the media library and audio capture, Android KeyStore cryptography and secret storage, package and signature inspection with APK install, Bluetooth scanning and pairing, USB device inspection, notifications and channels, web page/feed/weather reading, and persistent agent memory. Each category has its own section in [MCP_TOOLS.md](MCP_TOOLS.md).
 
 > **Tool Naming Convention**: All tool names are prefixed with `andromcp_` by default (e.g., `andromcp_tap`, `andromcp_find_nodes`). When a device slug is configured (e.g., `pixel7`), the prefix becomes `andromcp_pixel7_` (e.g., `andromcp_pixel7_tap`). See [MCP_TOOLS.md](MCP_TOOLS.md) for details.
 
@@ -809,7 +811,7 @@ All common development tasks are accessible via `make <target>`. Run `make help`
 
 - **[TOOLS.md](TOOLS.md)** — Git branching conventions, commit format, PR creation, GitHub CLI commands, and local CI testing with `act`
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — Detailed application architecture: component interactions, service lifecycle diagrams, threading model, inter-service communication patterns
-- **[MCP_TOOLS.md](MCP_TOOLS.md)** — Full MCP tools documentation with JSON-RPC schemas, usage examples, error codes, and implementation notes for all 67 tools
+- **[MCP_TOOLS.md](MCP_TOOLS.md)** — Full MCP tools documentation with JSON-RPC schemas, usage examples, error codes, and implementation notes for all 234 tools
 
 ---
 

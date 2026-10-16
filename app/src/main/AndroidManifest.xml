@@ -42,9 +42,42 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
 
+    <!-- Communication tools (runtime permissions, granted per app in Android Settings) -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+
+    <!-- Hardware and connectivity tools (VIBRATE is install-time; the Bluetooth permissions are
+         runtime on Android 12+ and are what the scan/pair tools gate themselves on) -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+
+    <!-- App-management tools: installing an APK the agent downloaded, and reading app usage.
+         PACKAGE_USAGE_STATS is special access granted in Settings, never at runtime. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- Special access: declaring these is what lists the app in the matching Settings screens
+         ("Modify system settings" for the brightness/timeout/rotation/font writes, and
+         "Do Not Disturb access" for the ringer and DND tools). They are granted by the user
+         there, never at runtime. -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+    <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
 
     <application
         android:name=".McpApplication"
@@ -169,6 +202,12 @@
             android:name=".ui.ApprovalActivity"
             android:exported="false"
             android:label="@string/approval_title" />
+
+        <!-- Receives the outcome of an APK install started by the install_apk tool. Not exported:
+             it is referenced only by an explicit PendingIntent created inside this app. -->
+        <receiver
+            android:name=".mcp.tools.ApkInstallReceiver"
+            android:exported="false" />
 
         <!-- Remove WorkManager's default on-startup initializer: McpApplication implements
              Configuration.Provider for on-demand initialization with the Hilt worker factory. -->

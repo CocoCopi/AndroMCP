@@ -135,7 +135,7 @@ class McpProtocolIntegrationTest {
         }
 
     companion object {
-        private const val EXPECTED_TOOL_COUNT = 67
+        private const val EXPECTED_TOOL_COUNT = 234
 
         private val EXPECTED_TOOL_NAMES =
             setOf(
