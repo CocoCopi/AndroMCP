@@ -365,7 +365,7 @@ class ExtractLinksHandler(
                         put("text", label)
                         put("external", !href.startsWith(originOf(html.finalUrl)))
                     }
-                }
+                }.toList()
         val json =
             buildJsonObject {
                 put("url", html.finalUrl)
