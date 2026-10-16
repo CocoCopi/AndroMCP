@@ -1,5 +1,6 @@
 package com.cococopi.andromcp.integration
 
+import android.content.Context
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
@@ -24,20 +25,37 @@ import com.cococopi.andromcp.mcp.oauth.OAuthServerDeps
 import com.cococopi.andromcp.mcp.oauth.installOAuthRoutes
 import com.cococopi.andromcp.mcp.tools.LoggedToolRegistrar
 import com.cococopi.andromcp.mcp.tools.McpToolUtils
+import com.cococopi.andromcp.mcp.tools.registerAgentMemoryTools
 import com.cococopi.andromcp.mcp.tools.registerAppManagementTools
+import com.cococopi.andromcp.mcp.tools.registerAudioCaptureTools
+import com.cococopi.andromcp.mcp.tools.registerBluetoothExtrasTools
 import com.cococopi.andromcp.mcp.tools.registerCameraTools
+import com.cococopi.andromcp.mcp.tools.registerCommsTools
+import com.cococopi.andromcp.mcp.tools.registerCryptoVaultTools
+import com.cococopi.andromcp.mcp.tools.registerDataTools
+import com.cococopi.andromcp.mcp.tools.registerDeviceServiceTools
+import com.cococopi.andromcp.mcp.tools.registerDeviceSettingsTools
 import com.cococopi.andromcp.mcp.tools.registerFileTools
 import com.cococopi.andromcp.mcp.tools.registerGestureTools
+import com.cococopi.andromcp.mcp.tools.registerHardwareTools
 import com.cococopi.andromcp.mcp.tools.registerIntentTools
 import com.cococopi.andromcp.mcp.tools.registerLocationTools
+import com.cococopi.andromcp.mcp.tools.registerMediaTools
+import com.cococopi.andromcp.mcp.tools.registerNetworkTools
 import com.cococopi.andromcp.mcp.tools.registerNodeActionTools
+import com.cococopi.andromcp.mcp.tools.registerNotificationExtrasTools
 import com.cococopi.andromcp.mcp.tools.registerNotificationTools
+import com.cococopi.andromcp.mcp.tools.registerPackageTools
 import com.cococopi.andromcp.mcp.tools.registerScreenIntrospectionTools
 import com.cococopi.andromcp.mcp.tools.registerSharingTools
+import com.cococopi.andromcp.mcp.tools.registerShellTools
 import com.cococopi.andromcp.mcp.tools.registerSystemActionTools
+import com.cococopi.andromcp.mcp.tools.registerTerminalTools
 import com.cococopi.andromcp.mcp.tools.registerTextInputTools
 import com.cococopi.andromcp.mcp.tools.registerTouchActionTools
 import com.cococopi.andromcp.mcp.tools.registerUtilityTools
+import com.cococopi.andromcp.mcp.tools.registerWebTools
+import com.cococopi.andromcp.mcp.tools.registerWorkspaceTools
 import com.cococopi.andromcp.privacy.ContextExtractor
 import com.cococopi.andromcp.privacy.DeterministicEngine
 import com.cococopi.andromcp.privacy.PlaceholderSubstitutor
@@ -281,6 +299,38 @@ object McpIntegrationTestHelper {
         registerGestureTools(registrar, deps.actionExecutor, toolNamePrefix, perms)
         registerInteractionToolBundle(registrar, deps, toolNamePrefix, perms)
         registerNonAccessibilityTools(registrar, deps, toolNamePrefix, perms)
+        registerExtendedToolBundles(registrar, deps, toolNamePrefix, perms)
+    }
+
+    /**
+     * Registers the device, media, package, web and memory bundles.
+     *
+     * Mirrors [com.cococopi.andromcp.services.mcp.McpServerService.registerAllTools] so the tool-count
+     * integration tests measure the surface the running server actually exposes.
+     */
+    private fun registerExtendedToolBundles(
+        registrar: LoggedToolRegistrar,
+        deps: MockDependencies,
+        toolNamePrefix: String,
+        perms: ToolPermissionsConfig,
+    ) {
+        registerDeviceServiceTools(registrar, deps.context, deps.intentDispatcher, toolNamePrefix, perms)
+        registerCommsTools(registrar, deps.context, toolNamePrefix, perms)
+        registerNetworkTools(registrar, deps.context, toolNamePrefix, perms)
+        registerHardwareTools(registrar, deps.context, toolNamePrefix, perms)
+        registerDeviceSettingsTools(registrar, deps.context, toolNamePrefix, perms)
+        registerWorkspaceTools(registrar, deps.context, toolNamePrefix, perms)
+        registerDataTools(registrar, deps.context, toolNamePrefix, perms)
+        registerShellTools(registrar, deps.context, toolNamePrefix, perms)
+        registerTerminalTools(registrar, deps.context, toolNamePrefix, perms)
+        registerMediaTools(registrar, deps.context, toolNamePrefix, perms)
+        registerAudioCaptureTools(registrar, deps.context, toolNamePrefix, perms)
+        registerCryptoVaultTools(registrar, deps.context, toolNamePrefix, perms)
+        registerPackageTools(registrar, deps.context, toolNamePrefix, perms)
+        registerBluetoothExtrasTools(registrar, deps.context, toolNamePrefix, perms)
+        registerNotificationExtrasTools(registrar, deps.context, toolNamePrefix, perms)
+        registerWebTools(registrar, deps.context, toolNamePrefix, perms)
+        registerAgentMemoryTools(registrar, deps.context, toolNamePrefix, perms)
     }
 
     private fun registerInteractionToolBundle(
@@ -617,5 +667,7 @@ data class MockDependencies(
     val pseudonymStore: PseudonymStore,
     val privacyToolGate: PrivacyToolGate,
     val placeholderSubstitutor: PlaceholderSubstitutor,
+    /** Relaxed mock: the extended bundles only touch the context inside their handlers. */
+    val context: Context = mockk(relaxed = true),
     val serverLog: RecordingServerLogRepository = RecordingServerLogRepository(),
 )
