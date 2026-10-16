@@ -1,0 +1,323 @@
+# Codemagic CI/CD configuration.
+#
+# This builds the same APKs the GitHub Actions workflow (.github/workflows/build-apk.yml) does: the
+# two debug flavors, plus signed release APKs when keystore credentials are available.
+#
+# Why the native steps exist: app/build.gradle.kts has a file dependency on
+# vendor/ngrok-java/**/target/*.jar and the submodules ship empty, so cloudflared and ngrok-java must
+# be cross-compiled for Android before Gradle runs — otherwise the Kotlin compile step fails on every
+# com.ngrok reference. The toolchain installer below is OS-aware, so switching `instance_type`
+# between a Linux and a macOS machine needs no other change.
+#
+# ── Choosing a machine ────────────────────────────────────────────────────────────────────────────
+# linux_x2 is the fast (and cheaper) option for Android builds, but Codemagic only offers it on plans
+# with billing enabled. If a build reports that the instance type is unavailable, change
+# `instance_type` to `mac_mini_m2` — the scripts below install the Go/Rust/Maven toolchain either way.
+# `ubuntu` is intentionally NOT pinned so the default (newest supported) Linux image is used.
+#
+# ── Getting a build going ─────────────────────────────────────────────────────────────────────────
+#   1. Add this repository in Codemagic (Apps > Add application).
+#   2. Set up a webhook if you want pushes to main to build automatically, or just press
+#      "Start new build" and pick a workflow.
+#   3. Run the `android-debug-apk` workflow. It needs NO secrets or code signing: debug builds are
+#      signed with the standard Android debug key.
+#   4. Download the APKs from the Artifacts section of the build page.
+#
+# The `android-release-apk` workflow additionally requires an environment variable group named
+# `keystore_credentials` (Application or Team settings > Environment variables) holding the same four
+# values the GitHub release workflow uses:
+#   RELEASE_KEYSTORE_BASE64   base64 of the .jks file  (base64 -w0 release.jks)
+#   RELEASE_KEYSTORE_PASSWORD keystore password
+#   RELEASE_KEY_ALIAS         key alias (e.g. upload)
+#   RELEASE_KEY_PASSWORD      key password
+
+workflows:
+  # ── The one you want for a quick installable build: no secrets, no signing setup ────────────────
+  android-debug-apk:
+    name: Android debug APKs (gms + foss)
+    instance_type: linux_x2
+    max_build_duration: 120
+    environment:
+      java: 17
+      ndk: r27
+      vars:
+        # Pinned to the same Go release the GitHub workflow uses.
+        GO_VERSION: "1.25.6"
+        # No daemon: a fresh CI machine never reuses it, and it would only hold memory.
+        GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    cache:
+      cache_paths:
+        # Gradle: dependency downloads and the wrapper distribution.
+        - ~/.gradle/caches
+        - ~/.gradle/wrapper
+        # Go and Rust build caches — the cloudflared/ngrok compile is the slow part of this build.
+        - ~/.cache/go-build
+        - ~/go/pkg/mod
+        - ~/.cargo/registry
+        - ~/.cargo/git
+        # Native outputs and the monthly DB-IP CSV, so an unchanged submodule is not recompiled.
+        - $CM_BUILD_DIR/app/src/main/jniLibs
+        - $CM_BUILD_DIR/vendor/ngrok-java/ngrok-java/target
+        - $CM_BUILD_DIR/vendor/ngrok-java/ngrok-java-native/target
+        - $CM_BUILD_DIR/.dbip-cache
+    triggering:
+      events:
+        - push
+        - tag
+      branch_patterns:
+        - pattern: main
+          include: true
+      tag_patterns:
+        - pattern: "v*"
+          include: true
+      cancel_previous_builds: true
+    scripts:
+      - name: Prepare repository
+        script: |
+          set -e
+          # Submodules ship empty and hold the cloudflared / ngrok-java sources.
+          git submodule update --init --recursive
+          # app/build.gradle.kts derives versionName/versionCode from git (git describe + commit
+          # count) with no hardcoded fallback, so make sure both history and tags are present even if
+          # the machine checked out a shallow clone.
+          if [ -f .git/shallow ]; then git fetch --unshallow --tags || true; fi
+          git fetch --tags --force || true
+          git describe --tags --always
+
+      - name: Install build toolchain (Go, Rust, Maven)
+        script: |
+          set -e
+          export PATH="$HOME/.cargo/bin:/usr/local/go/bin:$PATH"
+
+          # ── Go (cross-compiles cloudflared) ──
+          if ! command -v go >/dev/null 2>&1 || [ "$(go env GOVERSION 2>/dev/null)" != "go${GO_VERSION}" ]; then
+            case "$(uname -s)" in
+              Linux)  GO_OS=linux;;
+              Darwin) GO_OS=darwin;;
+              *)      echo "unsupported host: $(uname -s)"; exit 1;;
+            esac
+            case "$(uname -m)" in
+              x86_64|amd64) GO_ARCH=amd64;;
+              arm64|aarch64) GO_ARCH=arm64;;
+              *)            echo "unsupported arch: $(uname -m)"; exit 1;;
+            esac
+            echo "Installing Go ${GO_VERSION} (${GO_OS}-${GO_ARCH})"
+            curl -fsSL "https://go.dev/dl/go${GO_VERSION}.${GO_OS}-${GO_ARCH}.tar.gz" -o /tmp/go.tar.gz
+            if [ -w /usr/local ] 2>/dev/null; then GO_DIR=/usr/local; else GO_DIR="$HOME/.local"; fi
+            rm -rf "${GO_DIR}/go" && mkdir -p "$GO_DIR" && tar -C "$GO_DIR" -xzf /tmp/go.tar.gz
+            export PATH="${GO_DIR}/go/bin:$PATH"
+          fi
+          go version
+
+          # ── Rust (cross-compiles the ngrok native library) ──
+          if ! command -v cargo >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+              | sh -s -- -y --profile minimal --default-toolchain stable
+          fi
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup target add aarch64-linux-android x86_64-linux-android
+          cargo --version
+
+          # ── Maven (builds the ngrok-java JARs) ──
+          if ! command -v mvn >/dev/null 2>&1; then
+            if command -v brew >/dev/null 2>&1; then
+              brew install maven
+            else
+              sudo apt-get update -qq && sudo apt-get install -y -qq maven
+            fi
+          fi
+          mvn --version
+          # java + jar are needed by the ngrok packaging steps.
+          java -version
+          jar --version
+
+      - name: Compile native dependencies
+        script: |
+          set -e
+          export PATH="$HOME/.cargo/bin:/usr/local/go/bin:$PATH"
+          if [ -x "$HOME/.local/go/bin/go" ]; then export PATH="$HOME/.local/go/bin:$PATH"; fi
+
+          # The Makefile auto-detects the NDK under $ANDROID_HOME/ndk and in the macOS Homebrew cask
+          # location. Codemagic installs the NDK from `environment.ndk` and exposes ANDROID_NDK_HOME,
+          # so prefer that and pass it through explicitly.
+          NDK_ROOT="${ANDROID_NDK_HOME:-${ANDROID_NDK_ROOT:-}}"
+          if [ -z "$NDK_ROOT" ] || [ ! -d "$NDK_ROOT" ]; then
+            NDK_ROOT="$(ls -d "${ANDROID_HOME}"/ndk/* 2>/dev/null | sort -V | tail -1 || true)"
+          fi
+          if [ -z "$NDK_ROOT" ] || [ ! -d "$NDK_ROOT" ]; then
+            echo "Android NDK not found. Set environment.ndk in codemagic.yaml (currently r27)."
+            exit 1
+          fi
+          echo "Using NDK: $NDK_ROOT"
+
+          # Reuse whatever the cache restored; only compile what is actually missing.
+          if [ -f app/src/main/jniLibs/arm64-v8a/libcloudflared.so ] \
+             && [ -f app/src/main/jniLibs/x86_64/libcloudflared.so ]; then
+            echo "cloudflared .so files present — skipping its compile"
+          else
+            make compile-cloudflared NDK_ROOT="$NDK_ROOT"
+          fi
+
+          if [ -f app/src/main/jniLibs/arm64-v8a/libngrok_java.so ] \
+             && [ -f app/src/main/jniLibs/x86_64/libngrok_java.so ] \
+             && [ -f vendor/ngrok-java/ngrok-java/target/ngrok-java-1.2.0-SNAPSHOT.jar ] \
+             && [ -f vendor/ngrok-java/ngrok-java-native/target/ngrok-java-native-classes.jar ]; then
+            echo "ngrok-java JARs and .so files present — skipping its compile"
+          else
+            make compile-ngrok-native NDK_ROOT="$NDK_ROOT" JAVA_HOME_17="$JAVA_HOME"
+          fi
+
+          ls -lh app/src/main/jniLibs/*/libcloudflared.so app/src/main/jniLibs/*/libngrok_java.so
+
+      - name: Build debug APKs
+        script: |
+          set -e
+          chmod +x gradlew
+          # No -x lint/test: the build must fail loudly if the code does not compile.
+          # The offline geolocation DB is generated here too, by scripts/location-db/build_location_db.py
+          # (needs python3 + network; the machine has both).
+          ./gradlew --no-daemon assembleGmsDebug assembleFossDebug
+
+      - name: Report built APKs
+        script: |
+          set -e
+          find app/build/outputs/apk -name '*.apk' -exec ls -lh {} \;
+    artifacts:
+      - app/build/outputs/apk/**/*.apk
+
+  # ── Signed release APKs. Requires the `keystore_credentials` variable group (see header) ─────────
+  android-release-apk:
+    name: Android release APKs (signed)
+    instance_type: linux_x2
+    max_build_duration: 120
+    environment:
+      java: 17
+      ndk: r27
+      groups:
+        - keystore_credentials
+      vars:
+        GO_VERSION: "1.25.6"
+        GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    cache:
+      cache_paths:
+        - ~/.gradle/caches
+        - ~/.gradle/wrapper
+        - ~/.cache/go-build
+        - ~/go/pkg/mod
+        - ~/.cargo/registry
+        - ~/.cargo/git
+        - $CM_BUILD_DIR/app/src/main/jniLibs
+        - $CM_BUILD_DIR/vendor/ngrok-java/ngrok-java/target
+        - $CM_BUILD_DIR/vendor/ngrok-java/ngrok-java-native/target
+        - $CM_BUILD_DIR/.dbip-cache
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: "v*"
+          include: true
+    scripts:
+      - name: Prepare repository
+        script: |
+          set -e
+          git submodule update --init --recursive
+          if [ -f .git/shallow ]; then git fetch --unshallow --tags || true; fi
+          git fetch --tags --force || true
+          git describe --tags --always
+
+      - name: Install build toolchain (Go, Rust, Maven)
+        script: |
+          set -e
+          export PATH="$HOME/.cargo/bin:/usr/local/go/bin:$PATH"
+          if ! command -v go >/dev/null 2>&1 || [ "$(go env GOVERSION 2>/dev/null)" != "go${GO_VERSION}" ]; then
+            case "$(uname -s)" in
+              Linux)  GO_OS=linux;;
+              Darwin) GO_OS=darwin;;
+            esac
+            case "$(uname -m)" in
+              x86_64|amd64) GO_ARCH=amd64;;
+              arm64|aarch64) GO_ARCH=arm64;;
+            esac
+            curl -fsSL "https://go.dev/dl/go${GO_VERSION}.${GO_OS}-${GO_ARCH}.tar.gz" -o /tmp/go.tar.gz
+            if [ -w /usr/local ] 2>/dev/null; then GO_DIR=/usr/local; else GO_DIR="$HOME/.local"; fi
+            rm -rf "${GO_DIR}/go" && mkdir -p "$GO_DIR" && tar -C "$GO_DIR" -xzf /tmp/go.tar.gz
+            export PATH="${GO_DIR}/go/bin:$PATH"
+          fi
+          if ! command -v cargo >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+              | sh -s -- -y --profile minimal --default-toolchain stable
+          fi
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup target add aarch64-linux-android x86_64-linux-android
+          if ! command -v mvn >/dev/null 2>&1; then
+            if command -v brew >/dev/null 2>&1; then brew install maven; else
+              sudo apt-get update -qq && sudo apt-get install -y -qq maven
+            fi
+          fi
+          go version && cargo --version && mvn --version && java -version
+
+      - name: Compile native dependencies
+        script: |
+          set -e
+          export PATH="$HOME/.cargo/bin:/usr/local/go/bin:$PATH"
+          if [ -x "$HOME/.local/go/bin/go" ]; then export PATH="$HOME/.local/go/bin:$PATH"; fi
+          NDK_ROOT="${ANDROID_NDK_HOME:-${ANDROID_NDK_ROOT:-}}"
+          if [ -z "$NDK_ROOT" ] || [ ! -d "$NDK_ROOT" ]; then
+            NDK_ROOT="$(ls -d "${ANDROID_HOME}"/ndk/* 2>/dev/null | sort -V | tail -1 || true)"
+          fi
+          if [ -z "$NDK_ROOT" ] || [ ! -d "$NDK_ROOT" ]; then
+            echo "Android NDK not found. Set environment.ndk in codemagic.yaml (currently r27)."
+            exit 1
+          fi
+          echo "Using NDK: $NDK_ROOT"
+          if [ -f app/src/main/jniLibs/arm64-v8a/libcloudflared.so ] \
+             && [ -f app/src/main/jniLibs/x86_64/libcloudflared.so ]; then
+            echo "cloudflared .so files present — skipping its compile"
+          else
+            make compile-cloudflared NDK_ROOT="$NDK_ROOT"
+          fi
+          if [ -f app/src/main/jniLibs/arm64-v8a/libngrok_java.so ] \
+             && [ -f app/src/main/jniLibs/x86_64/libngrok_java.so ] \
+             && [ -f vendor/ngrok-java/ngrok-java/target/ngrok-java-1.2.0-SNAPSHOT.jar ] \
+             && [ -f vendor/ngrok-java/ngrok-java-native/target/ngrok-java-native-classes.jar ]; then
+            echo "ngrok-java JARs and .so files present — skipping its compile"
+          else
+            make compile-ngrok-native NDK_ROOT="$NDK_ROOT" JAVA_HOME_17="$JAVA_HOME"
+          fi
+
+      - name: Write signing material
+        script: |
+          set -e
+          # Same four variables the GitHub release workflow uses, so one set of credentials serves both.
+          missing=""
+          for name in RELEASE_KEYSTORE_BASE64 RELEASE_KEYSTORE_PASSWORD RELEASE_KEY_ALIAS RELEASE_KEY_PASSWORD; do
+            eval "value=\${$name:-}"
+            if [ -z "$value" ]; then missing="$missing $name"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "Missing keystore variables:$missing"
+            echo "Add them to the 'keystore_credentials' group in Codemagic (Application or Team settings)."
+            exit 1
+          fi
+          # storeFile must be an absolute path: app/build.gradle.kts resolves it relative to app/.
+          printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 -d > "$CM_BUILD_DIR/release.jks"
+          {
+            echo "storeFile=$CM_BUILD_DIR/release.jks"
+            echo "storePassword=$RELEASE_KEYSTORE_PASSWORD"
+            echo "keyAlias=$RELEASE_KEY_ALIAS"
+            echo "keyPassword=$RELEASE_KEY_PASSWORD"
+          } > "$CM_BUILD_DIR/keystore.properties"
+          echo "Signing material written for alias: $RELEASE_KEY_ALIAS"
+
+      - name: Build release APKs
+        script: |
+          set -e
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleGmsRelease assembleFossRelease
+
+      - name: Report built APKs
+        script: |
+          set -e
+          find app/build/outputs/apk -name '*.apk' -exec ls -lh {} \;
+    artifacts:
+      - app/build/outputs/apk/**/*.apk

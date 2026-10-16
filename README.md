@@ -131,6 +131,18 @@ make install  # installs on connected device/emulator
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for full build requirements and instructions.
 
+**Prefer letting a CI machine do it?** Two cloud setups are included, and neither needs your
+machine to have a JDK, NDK, Go, Rust, or Maven installed:
+
+- **GitHub Actions** — [`.github/workflows/build-apk.yml`](.github/workflows/build-apk.yml) builds
+the debug APKs on every push to `main`, or on demand from the Actions tab. No secrets required;
+download the APKs from the run's *Artifacts* section.
+- **Codemagic** — [`codemagic.yaml`](codemagic.yaml) runs the same build. Pick the repository in
+Codemagic and run the `android-debug-apk` workflow. Its `android-release-apk` workflow produces
+signed release APKs once a `keystore_credentials` environment variable group holds
+`RELEASE_KEYSTORE_BASE64`, `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`, and
+`RELEASE_KEY_PASSWORD`.
+
 ---
 
 ## Setup
