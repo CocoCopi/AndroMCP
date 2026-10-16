@@ -495,8 +495,8 @@ class MeasureNoiseLevelHandler(
                 put("sample_count", samples.size)
                 put("peak_amplitude", samples.maxOrNull() ?: 0)
                 put("average_amplitude", if (samples.isEmpty()) 0 else samples.average().toInt())
-                put("peak_dbfs", round1(dbfs(samples.maxOrNull() ?: 0)))
-                put("average_dbfs", round1(dbfs(if (samples.isEmpty()) 0 else samples.average())))
+                put("peak_dbfs", round1(dbfs((samples.maxOrNull() ?: 0).toDouble())))
+                put("average_dbfs", round1(dbfs(if (samples.isEmpty()) 0.0 else samples.average())))
                 put("interpretation", interpret(samples.maxOrNull() ?: 0))
             }
         return McpToolUtils.textResult(json.toString())

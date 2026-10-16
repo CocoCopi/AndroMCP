@@ -601,7 +601,7 @@ class UnpairBluetoothDeviceHandler(
         val removed =
             withContext(Dispatchers.IO) {
                 try {
-                    device.removeBond()
+                    removeBond(device)
                 } catch (exception: Exception) {
                     throw McpToolException.ActionFailed(
                         "Could not unpair '$address': " +
@@ -1009,6 +1009,23 @@ class GetUsbDeviceDetailHandler(
 }
 
 /** Resolves the USB manager, failing clearly on hardware without USB host support. */
+/**
+ * Unpairs [device] by calling `BluetoothDevice.removeBond()` reflectively.
+ *
+ * Every Android release has the method, but it is marked @hide and so is absent from the SDK this
+ * module compiles against. Failures (a release that blocks the hidden API, or a device that has
+ * already dropped the bond) surface as the caller's "Could not unpair" error.
+ */
+private fun removeBond(device: BluetoothDevice): Boolean =
+    try {
+        BluetoothDevice::class.java.getMethod("removeBond").invoke(device) as? Boolean ?: false
+    } catch (exception: ReflectiveOperationException) {
+        throw McpToolException.ActionFailed(
+            "This Android version does not expose Bluetooth unpairing to apps " +
+                "(${exception.javaClass.simpleName}). Unpair the device from Settings > Bluetooth.",
+        )
+    }
+
 private fun usbManager(context: Context): UsbManager =
     context.getSystemService(Context.USB_SERVICE) as? UsbManager
         ?: throw McpToolException.ActionFailed("This device does not expose a USB manager.")

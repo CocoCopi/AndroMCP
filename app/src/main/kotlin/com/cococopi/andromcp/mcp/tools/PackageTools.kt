@@ -10,6 +10,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
+import android.content.pm.Signature
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -26,9 +27,13 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.security.MessageDigest
+import java.security.cert.CertificateException
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 
 /**
  * Package and app-management tool bundle.
@@ -73,6 +78,18 @@ private fun digestHex(
     val digest = MessageDigest.getInstance(algorithm).digest(bytes)
     return digest.joinToString("") { "%02x".format(it) }
 }
+
+/**
+ * Decodes one APK signer blob (`PackageInfo`/`SigningInfo` hand out [Signature] objects) into its
+ * X.509 certificate. Returns null when the blob cannot be parsed.
+ */
+private fun x509CertificateOf(signature: Signature): X509Certificate? =
+    try {
+        CertificateFactory.getInstance("X.509")
+            .generateCertificate(ByteArrayInputStream(signature.toByteArray())) as? X509Certificate
+    } catch (_: CertificateException) {
+        null
+    }
 
 /** Shared package-manager plumbing for the app bundle. */
 private object AppInventory {
@@ -572,16 +589,17 @@ class GetAppSignatureHandler(
                 put("has_multiple_signers", signingInfo.hasMultipleSigners())
                 put("has_past_signing_certificates", signingInfo.hasPastSigningCertificates())
                 putJsonArray("signatures") {
-                    certificates.forEach { certificate ->
+                    certificates.forEach { signature ->
+                        val certificate = x509CertificateOf(signature)
                         add(
                             buildJsonObject {
-                                put("sha256", digestHex(certificate.toByteArray(), "SHA-256"))
-                                put("sha1", digestHex(certificate.toByteArray(), "SHA-1"))
-                                put("signature_algorithm", certificate.sigAlgName)
-                                put("issuer", certificate.issuerDN?.name.orEmpty())
-                                put("subject", certificate.subjectDN?.name.orEmpty())
-                                put("not_before", certificate.notBefore.time)
-                                put("not_after", certificate.notAfter.time)
+                                put("sha256", digestHex(signature.toByteArray(), "SHA-256"))
+                                put("sha1", digestHex(signature.toByteArray(), "SHA-1"))
+                                put("signature_algorithm", certificate?.sigAlgName.orEmpty())
+                                put("issuer", certificate?.issuerDN?.name.orEmpty())
+                                put("subject", certificate?.subjectDN?.name.orEmpty())
+                                put("not_before", certificate?.notBefore?.time)
+                                put("not_after", certificate?.notAfter?.time)
                             },
                         )
                     }
@@ -1201,6 +1219,16 @@ class QueryIntentHandlersHandler(
         val intent = Intent(action)
         if (dataUri.isNotEmpty()) intent.data = Uri.parse(dataUri)
         if (mimeType.isNotEmpty()) intent.type = mimeType
+        // The activity the system would actually launch for this intent, so `is_default` reports the
+        // user's current choice instead of a flag bit taken off the wrong object.
+        val defaultHandler =
+            withContext(Dispatchers.IO) {
+                context.packageManager
+                    .resolveActivity(
+                        intent,
+                        PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong()),
+                    )?.activityInfo
+            }
         val handlers =
             withContext(Dispatchers.IO) {
                 context.packageManager
@@ -1218,8 +1246,9 @@ class QueryIntentHandlersHandler(
                             )
                             put(
                                 "is_default",
-                                resolved.filter?.let { it and android.content.IntentFilter.MATCH_DEFAULT_ONLY != 0 }
-                                    ?: false,
+                                defaultHandler?.let {
+                                    it.packageName == activity.packageName && it.name == activity.name
+                                } ?: false,
                             )
                         }
                     }.sortedBy { it["package_name"].toString() }

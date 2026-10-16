@@ -288,15 +288,21 @@ class GetBatteryDetailsHandler(
             put("scale", status?.getIntExtra(BatteryManager.EXTRA_SCALE, 0))
             put(
                 "status",
-                HardwareLabels.batteryStatus(status?.getIntExtra(BatteryManager.EXTRA_STATUS, MISSING_INT)),
+                HardwareLabels.batteryStatus(
+                    status?.getIntExtra(BatteryManager.EXTRA_STATUS, MISSING_INT) ?: MISSING_INT,
+                ),
             )
             put(
                 "plugged",
-                HardwareLabels.batteryPlugged(status?.getIntExtra(BatteryManager.EXTRA_PLUGGED, MISSING_INT)),
+                HardwareLabels.batteryPlugged(
+                    status?.getIntExtra(BatteryManager.EXTRA_PLUGGED, MISSING_INT) ?: MISSING_INT,
+                ),
             )
             put(
                 "health",
-                HardwareLabels.batteryHealth(status?.getIntExtra(BatteryManager.EXTRA_HEALTH, MISSING_INT)),
+                HardwareLabels.batteryHealth(
+                    status?.getIntExtra(BatteryManager.EXTRA_HEALTH, MISSING_INT) ?: MISSING_INT,
+                ),
             )
             put("technology", status?.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY))
             put("voltage_mv", status?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, MISSING_INT))
@@ -1005,7 +1011,7 @@ class GetAudioDevicesHandler(
     private fun deviceJson(device: AudioDeviceInfo): JsonObject =
         buildJsonObject {
             put("type", HardwareLabels.audioDeviceType(device.type))
-            put("product_name", device.productName)
+            put("product_name", device.productName.toString())
             put("source", device.isSource)
             put("channel_counts", device.channelCounts.joinToString(", "))
             put("sample_rates_hz", device.sampleRates.joinToString(", "))

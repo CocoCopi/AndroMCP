@@ -64,8 +64,8 @@ internal object TerminalSessions {
         val stdin: Writer = OutputStreamWriter(process.outputStream)
         val isAlive: Boolean get() = process.isAlive
 
-        /** PID while the process runs, or -1 once it has exited. */
-        fun pidOrMinusOne(): Long = if (process.isAlive) process.pid() else -1L
+        /** PID while the process runs, or -1 once it has exited (or when the platform hides it). */
+        fun pidOrMinusOne(): Long = if (process.isAlive) pidOf(process) else -1L
 
         /** Appends freshly read output, trimming the oldest characters past the buffer ceiling. */
         fun append(text: String) {
@@ -181,6 +181,22 @@ internal object TerminalSessions {
 }
 
 /** Shell started by `terminal_open` when the caller does not name one. */
+/**
+ * PID of a spawned child process, or -1 when it cannot be read.
+ *
+ * `java.lang.Process.pid()` exists on desktop Java but is not part of the Android SDK, so the value is
+ * taken reflectively from the runtime implementation. Where a release refuses that, the session
+ * reports -1 instead of failing: the PID is informational, and sessions are stopped by handle.
+ */
+private fun pidOf(process: Process): Long =
+    try {
+        (process.javaClass.getMethod("pid").invoke(process) as? Int)?.toLong() ?: -1L
+    } catch (_: ReflectiveOperationException) {
+        -1L
+    } catch (_: SecurityException) {
+        -1L
+    }
+
 private const val TERMINAL_DEFAULT_SHELL = "/system/bin/sh"
 
 // ─────────────────────────────────────────────────────────────────────────────

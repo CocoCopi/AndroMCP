@@ -53,6 +53,13 @@ private data class FetchedResource(
     val truncated: Boolean,
 )
 
+/**
+ * Flags shared by every HTML/XML pattern in this file: markup is case-insensitive and element bodies
+ * may span lines. Declared at file scope because [WebClient] and the tool handlers below both build
+ * patterns from it (a member of [WebClient] is not visible inside their companions).
+ */
+private val HTML_FLAGS: Set<RegexOption> = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)
+
 /** Minimal HTTP client shared by the web bundle. */
 private object WebClient {
     const val DEFAULT_TIMEOUT_MS = 15_000
@@ -131,7 +138,7 @@ private object WebClient {
                 connection.disconnect()
                 current =
                     try {
-                        URI(current.toURL(), location)
+                        current.resolve(location)
                     } catch (exception: Exception) {
                         throw McpToolException.ActionFailed(
                             "'$current' redirected to an unusable URL ($location): ${exception.message}",
@@ -206,7 +213,6 @@ private object WebClient {
     private const val READ_CHUNK = 8192
     private const val HTTP_ERROR_THRESHOLD = 400
     private val REDIRECT_CODES = setOf(301, 302, 303, 307, 308)
-    private val HTML_FLAGS = RegexOption.IGNORE_CASE or RegexOption.DOT_MATCHES_ALL
     private val TITLE_PATTERN = Regex("<title[^>]*>(.*?)</title>", HTML_FLAGS)
     private val SCRIPT_STYLE_PATTERN = Regex("<(script|style|noscript)[^>]*>.*?</\\1>", HTML_FLAGS)
     private val BLOCK_BOUNDARY_PATTERN =
@@ -646,7 +652,7 @@ class GetRssFeedHandler(
         item: String,
         tag: String,
     ): String {
-        val match = Regex("<$tag[^>]*>(.*?)</$tag>", RegexOption.IGNORE_CASE or RegexOption.DOT_MATCHES_ALL).find(item)
+        val match = Regex("<$tag[^>]*>(.*?)</$tag>", HTML_FLAGS).find(item)
         val raw = match?.groupValues?.get(1)?.trim().orEmpty()
         return WebClient.decodeEntities(raw)
     }

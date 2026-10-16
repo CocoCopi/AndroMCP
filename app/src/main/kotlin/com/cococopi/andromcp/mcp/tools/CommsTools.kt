@@ -142,7 +142,7 @@ class ListSmsThreadsHandler(
         RuntimePermissionGate.require(context, Manifest.permission.READ_SMS, TOOL_NAME)
 
         val limit = McpToolUtils.optionalInt(arguments, "limit", DEFAULT_THREAD_LIMIT)
-        McpToolUtils.validatePositiveRange(limit.toLong(), "limit", MAX_THREAD_LIMIT)
+        McpToolUtils.validatePositiveRange(limit.toLong(), "limit", MAX_THREAD_LIMIT.toLong())
 
         Log.d(TAG, "Executing list_sms_threads (limit=$limit)")
 
@@ -284,7 +284,7 @@ class ReadSmsThreadHandler(
         RuntimePermissionGate.require(context, Manifest.permission.READ_SMS, TOOL_NAME)
 
         val limit = McpToolUtils.optionalInt(arguments, "limit", DEFAULT_MESSAGE_LIMIT)
-        McpToolUtils.validatePositiveRange(limit.toLong(), "limit", MAX_MESSAGE_LIMIT)
+        McpToolUtils.validatePositiveRange(limit.toLong(), "limit", MAX_MESSAGE_LIMIT.toLong())
 
         val hasThreadId = arguments?.containsKey("thread_id") == true
         val address = McpToolUtils.optionalString(arguments, "address", "")
@@ -432,7 +432,7 @@ class SearchSmsHandler(
             throw McpToolException.InvalidParams("Parameter 'query' must not be blank")
         }
         val limit = McpToolUtils.optionalInt(arguments, "limit", DEFAULT_MESSAGE_LIMIT)
-        McpToolUtils.validatePositiveRange(limit.toLong(), "limit", MAX_MESSAGE_LIMIT)
+        McpToolUtils.validatePositiveRange(limit.toLong(), "limit", MAX_MESSAGE_LIMIT.toLong())
 
         Log.d(TAG, "Executing search_sms")
 
@@ -541,7 +541,7 @@ class ListCallLogHandler(
         RuntimePermissionGate.require(context, Manifest.permission.READ_CALL_LOG, TOOL_NAME)
 
         val limit = McpToolUtils.optionalInt(arguments, "limit", DEFAULT_CALL_LOG_LIMIT)
-        McpToolUtils.validatePositiveRange(limit.toLong(), "limit", MAX_CALL_LOG_LIMIT)
+        McpToolUtils.validatePositiveRange(limit.toLong(), "limit", MAX_CALL_LOG_LIMIT.toLong())
         val typeFilter = McpToolUtils.optionalString(arguments, "type", "").uppercase()
 
         Log.d(TAG, "Executing list_call_log (limit=$limit)")
@@ -664,7 +664,7 @@ class SearchContactsHandler(
             throw McpToolException.InvalidParams("Parameter 'query' must not be blank")
         }
         val limit = McpToolUtils.optionalInt(arguments, "limit", DEFAULT_CONTACT_LIMIT)
-        McpToolUtils.validatePositiveRange(limit.toLong(), "limit", MAX_CONTACT_LIMIT)
+        McpToolUtils.validatePositiveRange(limit.toLong(), "limit", MAX_CONTACT_LIMIT.toLong())
 
         Log.d(TAG, "Executing search_contacts")
 
@@ -1021,7 +1021,7 @@ class ListCalendarEventsHandler(
             )
         }
         val limit = McpToolUtils.optionalInt(arguments, "limit", DEFAULT_EVENT_LIMIT)
-        McpToolUtils.validatePositiveRange(limit.toLong(), "limit", MAX_EVENT_LIMIT)
+        McpToolUtils.validatePositiveRange(limit.toLong(), "limit", MAX_EVENT_LIMIT.toLong())
 
         val now = System.currentTimeMillis()
         val startMillis = now - daysBack * MILLIS_PER_DAY
@@ -1169,7 +1169,7 @@ class CreateCalendarEventHandler(
         McpToolUtils.validatePositiveRange(
             durationMinutes.toLong(),
             "duration_minutes",
-            MAX_EVENT_DURATION_MINUTES,
+            MAX_EVENT_DURATION_MINUTES.toLong(),
         )
         val durationMillis = durationMinutes.toLong() * MILLIS_PER_MINUTE
         val endMillis =
