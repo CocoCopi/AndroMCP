@@ -10,10 +10,10 @@
 # between a Linux and a macOS machine needs no other change.
 #
 # ── Choosing a machine ────────────────────────────────────────────────────────────────────────────
-# linux_x2 is the fast (and cheaper) option for Android builds, but Codemagic only offers it on plans
-# with billing enabled. If a build reports that the instance type is unavailable, change
-# `instance_type` to `mac_mini_m2` — the scripts below install the Go/Rust/Maven toolchain either way.
-# `ubuntu` is intentionally NOT pinned so the default (newest supported) Linux image is used.
+# mac_mini_m2 is the instance type the free Codemagic tier includes (500 minutes/month on a personal
+# account). Switching to `linux_x2` or `mac_mini_m1` is faster per minute but is billed, so keep
+# mac_mini_m2 unless you have enabled billing. The scripts below are OS-aware — Go, Rust and Maven are
+# installed for whichever machine you pick — so `instance_type` is the only line that has to change.
 #
 # ── Getting a build going ─────────────────────────────────────────────────────────────────────────
 #   1. Add this repository in Codemagic (Apps > Add application).
@@ -35,7 +35,7 @@ workflows:
   # ── The one you want for a quick installable build: no secrets, no signing setup ────────────────
   android-debug-apk:
     name: Android debug APKs (gms + foss)
-    instance_type: linux_x2
+    instance_type: mac_mini_m2
     max_build_duration: 120
     environment:
       java: 17
@@ -188,7 +188,7 @@ workflows:
   # ── Signed release APKs. Requires the `keystore_credentials` variable group (see header) ─────────
   android-release-apk:
     name: Android release APKs (signed)
-    instance_type: linux_x2
+    instance_type: mac_mini_m2
     max_build_duration: 120
     environment:
       java: 17
