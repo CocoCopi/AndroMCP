@@ -118,6 +118,7 @@
     <string name="permission_section_required_subtitle">Needed for the app to control your device.</string>
     <string name="permission_section_required_if_title">Required if you use a feature</string>
     <string name="permission_section_required_if_subtitle">Grant only the capabilities you plan to use.</string>
+    <string name="tab_agent">Agent</string>
     <string name="permission_section_device_title">Device data</string>
     <string name="permission_section_device_subtitle">Messages, contacts, calendar, call log, Bluetooth, and system access for the newer tools. Grant only what you use.</string>
     <string name="permission_section_optional_title">Optional</string>

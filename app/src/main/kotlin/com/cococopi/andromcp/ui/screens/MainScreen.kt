@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -69,6 +70,7 @@ fun MainScreen(
             NavigationBar {
                 listOf(
                     Triple(TopLevelRoute.Server, Icons.Default.Dns, stringResource(R.string.tab_server)),
+                    Triple(TopLevelRoute.Agent, Icons.Default.SmartToy, stringResource(R.string.tab_agent)),
                     Triple(TopLevelRoute.Settings, Icons.Default.Settings, stringResource(R.string.tab_settings)),
                     Triple(TopLevelRoute.About, Icons.Default.Info, stringResource(R.string.tab_about)),
                 ).forEach { (route, icon, label) ->
@@ -104,6 +106,10 @@ fun MainScreen(
                     modifier = Modifier.padding(paddingValues),
                     viewModel = viewModel,
                 )
+            }
+
+            TopLevelRoute.Agent.route -> {
+                AgentScreen(modifier = Modifier.padding(paddingValues))
             }
 
             TopLevelRoute.Settings.route -> {

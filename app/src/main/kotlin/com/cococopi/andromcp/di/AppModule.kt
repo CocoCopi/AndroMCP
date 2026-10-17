@@ -85,9 +85,19 @@ import javax.inject.Singleton
 @Retention(AnnotationRetention.BINARY)
 annotation class OAuthClientsDataStore
 
+/** Qualifier for the dedicated agent Preferences DataStore. */
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AgentDataStore
+
 /** Extension property for creating the Preferences DataStore on [Context]. */
 private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "settings",
+)
+
+/** Extension property for the dedicated agent Preferences DataStore on [Context]. */
+private val Context.agentDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "agent",
 )
 
 /** Extension property for the dedicated OAuth-clients Preferences DataStore on [Context]. */
@@ -116,6 +126,16 @@ object AppModule {
     fun provideOAuthClientsDataStore(
         @ApplicationContext context: Context,
     ): DataStore<Preferences> = context.oauthClientsDataStore
+
+    /**
+     * Provides the dedicated application-scoped [DataStore] for the in-app agent's provider settings.
+     */
+    @Provides
+    @Singleton
+    @AgentDataStore
+    fun provideAgentDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<Preferences> = context.agentDataStore
 
     /**
      * Provides [Dispatchers.IO] for background work.

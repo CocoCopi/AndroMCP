@@ -5,6 +5,8 @@ sealed class TopLevelRoute(
 ) {
     data object Server : TopLevelRoute("server")
 
+    data object Agent : TopLevelRoute("agent")
+
     data object Settings : TopLevelRoute("settings")
 
     data object About : TopLevelRoute("about")
