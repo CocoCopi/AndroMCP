@@ -42,7 +42,7 @@ class ProviderPayloadTest {
 
             assertEquals("https://api.openai.com/v1/chat/completions", transport.url)
             assertEquals("Bearer sk-test", transport.headers["Authorization"])
-            assertEquals("gpt-4.1", LlmJson.parseObject(transport.body)?.stringOrNull("model"))
+            assertEquals("gpt-4.1", parsedBody(transport).stringOrNull("model"))
 
             val call = result.toolCalls.single()
             assertEquals("tap", call.name)
@@ -67,7 +67,7 @@ class ProviderPayloadTest {
             assertEquals("Bearer nvapi-test", transport.headers["Authorization"])
             assertEquals(
                 "meta/llama-3.3-70b-instruct",
-                LlmJson.parseObject(transport.body)?.stringOrNull("model"),
+                parsedBody(transport).stringOrNull("model"),
             )
         }
 
@@ -109,7 +109,7 @@ class ProviderPayloadTest {
             assertEquals("sk-ant-test", transport.headers["x-api-key"])
             assertEquals("2023-06-01", transport.headers["anthropic-version"])
 
-            val body = LlmJson.parseObject(transport.body)!!
+            val body = parsedBody(transport)
             assertEquals("system rules", body.stringOrNull("system"))
 
             val messages = body.arrayOrNull("messages")!!
@@ -151,7 +151,7 @@ class ProviderPayloadTest {
                     "?key=AIza-test",
                 transport.url,
             )
-            val body = LlmJson.parseObject(transport.body)!!
+            val body = parsedBody(transport)
             assertEquals(
                 "rules",
                 body
@@ -190,6 +190,12 @@ class ProviderPayloadTest {
             LlmClientFactory.create(LlmConfig(ModelProvider.OPENAI), transport)
         }
         assertTrue(transport.url.isEmpty(), "no request may be attempted without a key")
+    }
+
+    /** The request body as JSON; the transport's output is always an object the client built. */
+    private fun parsedBody(transport: RecordingTransport): JsonObject {
+        val json = LlmJson.requireObject(transport.body, "recording transport")
+        return json
     }
 
     private class RecordingTransport(
