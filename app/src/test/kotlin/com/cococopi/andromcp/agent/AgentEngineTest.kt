@@ -6,6 +6,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -106,6 +107,24 @@ class AgentEngineTest {
                 (events.last() as AgentEvent.Finished).reason,
             )
         }
+
+    @Test
+    fun `risky policy flags outgoing, destructive and writing calls only`() {
+        val noArgs = JsonObject(emptyMap())
+
+        assertTrue(RiskyToolPolicy.isRisky("send_sms", noArgs), "sending a message needs confirmation")
+        assertTrue(RiskyToolPolicy.isRisky("shell_exec", noArgs), "shell access needs confirmation")
+        assertTrue(RiskyToolPolicy.isRisky("delete_file", noArgs), "deleting needs confirmation")
+        assertTrue(
+            RiskyToolPolicy.isRisky("http_request", buildJsonObject { put("method", "POST") }),
+            "a writing HTTP call can exfiltrate data",
+        )
+        assertFalse(RiskyToolPolicy.isRisky("tap", noArgs))
+        assertFalse(
+            RiskyToolPolicy.isRisky("http_request", buildJsonObject { put("method", "GET") }),
+            "a read-only fetch runs unattended",
+        )
+    }
 
     private class RecordingRunner(
         private val definitions: List<AgentToolDefinition>,

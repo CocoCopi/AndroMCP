@@ -27,7 +27,7 @@ sealed interface AgentMessage {
     ) : AgentMessage
 
     data class Assistant(
-        val text: String,
+        val text: String = "",
         val toolCalls: List<AgentToolCall> = emptyList(),
     ) : AgentMessage
 
