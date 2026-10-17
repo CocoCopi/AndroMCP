@@ -1,5 +1,4 @@
 package com.cococopi.andromcp.services.mcp
-
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
@@ -13,7 +12,6 @@ import com.cococopi.andromcp.data.model.OptionalToolPermissions
 import com.cococopi.andromcp.data.model.ServerConfig
 import com.cococopi.andromcp.data.model.ServerLogEntry
 import com.cococopi.andromcp.data.model.ServerStatus
-import com.cococopi.andromcp.data.model.ToolPermissionsConfig
 import com.cococopi.andromcp.data.model.TunnelStatus
 import com.cococopi.andromcp.data.repository.OAuthClientRepository
 import com.cococopi.andromcp.data.repository.ServerLogRepository
@@ -26,41 +24,7 @@ import com.cococopi.andromcp.mcp.oauth.AuthorizationCodeStore
 import com.cococopi.andromcp.mcp.oauth.JwtTokenService
 import com.cococopi.andromcp.mcp.oauth.OAuthApprovalCoordinator
 import com.cococopi.andromcp.mcp.oauth.OAuthServerDeps
-import com.cococopi.andromcp.mcp.tools.LoggedToolRegistrar
 import com.cococopi.andromcp.mcp.tools.McpToolUtils
-import com.cococopi.andromcp.mcp.tools.ReferenceCountedToolCallIndicator
-import com.cococopi.andromcp.mcp.tools.ToolCallIndicator
-import com.cococopi.andromcp.mcp.tools.registerAgentMemoryTools
-import com.cococopi.andromcp.mcp.tools.registerAppManagementTools
-import com.cococopi.andromcp.mcp.tools.registerAudioCaptureTools
-import com.cococopi.andromcp.mcp.tools.registerBluetoothExtrasTools
-import com.cococopi.andromcp.mcp.tools.registerCameraTools
-import com.cococopi.andromcp.mcp.tools.registerCommsTools
-import com.cococopi.andromcp.mcp.tools.registerCryptoVaultTools
-import com.cococopi.andromcp.mcp.tools.registerDataTools
-import com.cococopi.andromcp.mcp.tools.registerDeviceServiceTools
-import com.cococopi.andromcp.mcp.tools.registerDeviceSettingsTools
-import com.cococopi.andromcp.mcp.tools.registerFileTools
-import com.cococopi.andromcp.mcp.tools.registerGestureTools
-import com.cococopi.andromcp.mcp.tools.registerHardwareTools
-import com.cococopi.andromcp.mcp.tools.registerIntentTools
-import com.cococopi.andromcp.mcp.tools.registerLocationTools
-import com.cococopi.andromcp.mcp.tools.registerMediaTools
-import com.cococopi.andromcp.mcp.tools.registerNetworkTools
-import com.cococopi.andromcp.mcp.tools.registerNodeActionTools
-import com.cococopi.andromcp.mcp.tools.registerNotificationExtrasTools
-import com.cococopi.andromcp.mcp.tools.registerNotificationTools
-import com.cococopi.andromcp.mcp.tools.registerPackageTools
-import com.cococopi.andromcp.mcp.tools.registerScreenIntrospectionTools
-import com.cococopi.andromcp.mcp.tools.registerSharingTools
-import com.cococopi.andromcp.mcp.tools.registerShellTools
-import com.cococopi.andromcp.mcp.tools.registerSystemActionTools
-import com.cococopi.andromcp.mcp.tools.registerTerminalTools
-import com.cococopi.andromcp.mcp.tools.registerTextInputTools
-import com.cococopi.andromcp.mcp.tools.registerTouchActionTools
-import com.cococopi.andromcp.mcp.tools.registerUtilityTools
-import com.cococopi.andromcp.mcp.tools.registerWebTools
-import com.cococopi.andromcp.mcp.tools.registerWorkspaceTools
 import com.cococopi.andromcp.privacy.PlaceholderSubstitutor
 import com.cococopi.andromcp.privacy.PrivacyModeManager
 import com.cococopi.andromcp.privacy.PrivacyModeStatus
@@ -69,7 +33,6 @@ import com.cococopi.andromcp.privacy.PseudonymStore
 import com.cococopi.andromcp.privacy.ner.NerCache
 import com.cococopi.andromcp.services.accessibility.AccessibilityNodeCache
 import com.cococopi.andromcp.services.accessibility.AccessibilityServiceProvider
-import com.cococopi.andromcp.services.accessibility.AccessibilityToolCallIndicator
 import com.cococopi.andromcp.services.accessibility.AccessibilityTreeParser
 import com.cococopi.andromcp.services.accessibility.ActionExecutor
 import com.cococopi.andromcp.services.accessibility.CompactTreeFormatter
@@ -132,49 +95,15 @@ class McpServerService : Service() {
 
     @Inject lateinit var certificateManager: CertificateManager
 
-    @Inject lateinit var actionExecutor: ActionExecutor
-
-    @Inject lateinit var accessibilityServiceProvider: AccessibilityServiceProvider
-
-    @Inject lateinit var screenCaptureProvider: ScreenCaptureProvider
-
-    @Inject lateinit var treeParser: AccessibilityTreeParser
-
-    @Inject lateinit var elementFinder: ElementFinder
-
-    @Inject lateinit var compactTreeFormatter: CompactTreeFormatter
-
-    @Inject lateinit var screenshotAnnotator: ScreenshotAnnotator
-
-    @Inject lateinit var screenshotEncoder: ScreenshotEncoder
-
     @Inject lateinit var tunnelManager: TunnelManager
-
-    @Inject lateinit var storageLocationProvider: StorageLocationProvider
-
-    @Inject lateinit var fileOperationProvider: FileOperationProvider
-
-    @Inject lateinit var appManager: AppManager
-
-    @Inject lateinit var typeInputController: TypeInputController
-
-    @Inject lateinit var nodeCache: AccessibilityNodeCache
 
     @Inject lateinit var screenStateSnapshotCache: ScreenStateSnapshotCache
 
-    @Inject lateinit var webViewNodeMerger: WebViewNodeMerger
-
     @Inject lateinit var cameraProvider: CameraProvider
-
-    @Inject lateinit var intentDispatcher: IntentDispatcher
 
     @Inject lateinit var notificationProvider: NotificationProvider
 
-    @Inject lateinit var locationProvider: LocationProvider
-
     @Inject lateinit var ephemeralFileLinkService: EphemeralFileLinkService
-
-    @Inject lateinit var sharedContentInbox: SharedContentInbox
 
     @Inject lateinit var jwtTokenService: JwtTokenService
 
@@ -188,11 +117,7 @@ class McpServerService : Service() {
 
     @Inject lateinit var serverLogRepository: ServerLogRepository
 
-    @Inject lateinit var privacyToolGate: PrivacyToolGate
-
-    @Inject lateinit var placeholderSubstitutor: PlaceholderSubstitutor
-
-    @Inject lateinit var screenshotRedactor: ScreenshotRedactor
+    @Inject lateinit var toolGraph: ToolGraph
 
     @Inject lateinit var privacyModeManager: PrivacyModeManager
 
@@ -203,7 +128,6 @@ class McpServerService : Service() {
     /** Config of the currently running server; used to build capability-link base URLs. */
     @Volatile
     private var activeConfig: ServerConfig? = null
-
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val serverActive = AtomicBoolean(false)
     private var mcpServer: McpServer? = null
@@ -231,7 +155,6 @@ class McpServerService : Service() {
         startId: Int,
     ): Int {
         startForeground(NOTIFICATION_ID, createNotification())
-
         when (intent?.action) {
             ACTION_STOP -> {
                 lastIntentWasStop = true
@@ -252,7 +175,6 @@ class McpServerService : Service() {
                 }
             }
         }
-
         return START_STICKY
     }
 
@@ -265,7 +187,6 @@ class McpServerService : Service() {
     private suspend fun startServer() {
         try {
             updateStatus(ServerStatus.Starting)
-
             // getServerConfig() guarantees ensureAuthModelMigrated() has run before the server reads
             // the auth model (prevents the cleared-token-user open-server regression).
             val config = settingsRepository.getServerConfig()
@@ -276,7 +197,6 @@ class McpServerService : Service() {
                 "Starting MCP server with config: port=${config.port}, " +
                     "binding=${config.bindingAddress.address}, toolNamePrefix=$toolNamePrefix",
             )
-
             // Only get/create SSL keystore when HTTPS is enabled
             val keyStore =
                 if (config.httpsEnabled) {
@@ -290,7 +210,6 @@ class McpServerService : Service() {
                 } else {
                     null
                 }
-
             // Create SDK Server instance and register all tools
             val sdkServer =
                 Server(
@@ -307,31 +226,18 @@ class McpServerService : Service() {
                                 ),
                         ),
                 )
-            // ALL four signals MUST come from PermissionUtils — the SAME source the UI uses
-            // (MainViewModel.refreshPermissionStatus) — so the server-start gate and the settings grey-out
-            // never diverge. Do NOT use cameraProvider.isCameraPermissionGranted()/isMicrophonePermissionGranted()
-            // or notificationProvider.isReady() here.
-            val grantedOptionalPermissions =
-                OptionalToolPermissions.grantedPermissions(
-                    camera = PermissionUtils.isCameraPermissionGranted(this@McpServerService),
-                    microphone = PermissionUtils.isMicrophonePermissionGranted(this@McpServerService),
-                    location = PermissionUtils.isLocationPermissionGranted(this@McpServerService),
-                    notificationListener =
-                        PermissionUtils.isNotificationListenerEnabled(
-                            this@McpServerService,
-                            McpNotificationListenerService::class.java,
-                        ),
-                )
-            val effectivePerms =
-                OptionalToolPermissions.effectivePermissions(config.toolPermissionsConfig, grantedOptionalPermissions)
-            registerAllTools(
-                sdkServer,
-                toolNamePrefix,
-                effectivePerms,
-                config.fileSizeLimitMb,
-                config.toolCallIndicatorEnabled,
+            // Effective permissions come from RuntimeToolAccess, which reads the SAME PermissionUtils
+            // signals the UI uses (MainViewModel.refreshPermissionStatus), so the server-start gate, the
+            // settings grey-out and the in-app agent's tool list never diverge.
+            val effectivePerms = RuntimeToolAccess.effectivePermissions(this@McpServerService, config)
+            toolGraph.registerAll(
+                server = sdkServer,
+                toolNamePrefix = toolNamePrefix,
+                perms = effectivePerms,
+                fileSizeLimitMb = config.fileSizeLimitMb,
+                toolCallIndicatorEnabled = config.toolCallIndicatorEnabled,
+                baseUrl = currentBaseUrl,
             )
-
             // Create and start the Ktor server
             mcpServer =
                 McpServer(
@@ -350,11 +256,9 @@ class McpServerService : Service() {
                     serverLog = serverLogRepository,
                 )
             mcpServer?.start()
-
             // Warm the geolocation DB off the request path so the first /authorize doesn't pay the
             // one-time gzip-inflate + mmap cost. Best-effort; a failure just leaves it lazy.
             coroutineScope.launch { geoIpResolver.resolve("8.8.8.8") }
-
             // Surface Privacy Mode readiness at start so the user learns of a failure now, not at the
             // first data-returning tool call. Off the request path; the result updates the manager status.
             if (config.privacyModeConfig.enabled) {
@@ -363,14 +267,12 @@ class McpServerService : Service() {
                     serverLogRepository.log(ServerLogEntry.Type.PRIVACY, message)
                 }
             }
-
             updateStatus(
                 ServerStatus.Running(
                     port = config.port,
                     bindingAddress = config.bindingAddress.address,
                 ),
             )
-
             // Start tunnel if remote access is enabled. A tunnel always targets an
             // http://localhost origin, so it MUST NOT run while the server serves HTTPS.
             if (config.httpsEnabled) {
@@ -384,7 +286,6 @@ class McpServerService : Service() {
                     Log.w(TAG, "Failed to start tunnel (server continues without tunnel)", e)
                 }
             }
-
             // Observe tunnel status for logging
             tunnelObserverJob =
                 coroutineScope.launch {
@@ -415,7 +316,6 @@ class McpServerService : Service() {
                         }
                     }
                 }
-
             // Observe pending OAuth approvals and surface a single heads-up notification (the service
             // is already foregrounded by onStartCommand; this is a separate, collapsed notification).
             approvalObserverJob =
@@ -428,7 +328,6 @@ class McpServerService : Service() {
                         }
                     }
                 }
-
             Log.i(TAG, "MCP server started successfully on ${config.bindingAddress.address}:${config.port}")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start MCP server", e)
@@ -456,136 +355,6 @@ class McpServerService : Service() {
         }
     }
 
-    private fun registerAllTools(
-        server: Server,
-        toolNamePrefix: String,
-        perms: ToolPermissionsConfig,
-        fileSizeLimitMb: Int,
-        toolCallIndicatorEnabled: Boolean,
-    ) {
-        val toolCallIndicator = ReferenceCountedToolCallIndicator(AccessibilityToolCallIndicator())
-        toolCallIndicator.setEnabled(toolCallIndicatorEnabled)
-        val registrar =
-            LoggedToolRegistrar(
-                server,
-                serverLogRepository,
-                toolCallIndicator,
-                perms,
-            )
-        registerAccessibilityToolBundle(registrar, toolNamePrefix, perms)
-        registerFileTools(registrar, storageLocationProvider, fileOperationProvider, toolNamePrefix, perms)
-        registerAppManagementTools(registrar, appManager, privacyToolGate, toolNamePrefix, perms)
-        registerCameraTools(registrar, cameraProvider, fileOperationProvider, toolNamePrefix, perms)
-        registerIntentTools(registrar, intentDispatcher, toolNamePrefix, perms)
-        registerNotificationTools(
-            registrar,
-            notificationProvider,
-            privacyToolGate,
-            placeholderSubstitutor,
-            toolNamePrefix,
-            perms,
-        )
-        registerLocationTools(registrar, locationProvider, privacyToolGate, toolNamePrefix, perms)
-        registerSharingBundle(registrar, toolNamePrefix, perms, fileSizeLimitMb)
-        registerDeviceServiceTools(registrar, applicationContext, intentDispatcher, toolNamePrefix, perms)
-        registerCommsTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerNetworkTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerHardwareTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerDeviceSettingsTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerWorkspaceTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerDataTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerShellTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerTerminalTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerMediaTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerAudioCaptureTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerCryptoVaultTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerPackageTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerBluetoothExtrasTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerNotificationExtrasTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerWebTools(registrar, applicationContext, toolNamePrefix, perms)
-        registerAgentMemoryTools(registrar, applicationContext, toolNamePrefix, perms)
-    }
-
-    private fun registerAccessibilityToolBundle(
-        registrar: LoggedToolRegistrar,
-        toolNamePrefix: String,
-        perms: ToolPermissionsConfig,
-    ) {
-        registerScreenIntrospectionTools(
-            registrar,
-            treeParser,
-            accessibilityServiceProvider,
-            screenCaptureProvider,
-            compactTreeFormatter,
-            screenshotAnnotator,
-            screenshotEncoder,
-            nodeCache,
-            screenStateSnapshotCache,
-            webViewNodeMerger,
-            privacyToolGate,
-            screenshotRedactor,
-            toolNamePrefix,
-            perms,
-        )
-        registerSystemActionTools(registrar, actionExecutor, accessibilityServiceProvider, toolNamePrefix, perms)
-        registerTouchActionTools(registrar, actionExecutor, toolNamePrefix, perms)
-        registerGestureTools(registrar, actionExecutor, toolNamePrefix, perms)
-        registerNodeActionTools(
-            registrar,
-            treeParser,
-            elementFinder,
-            actionExecutor,
-            accessibilityServiceProvider,
-            nodeCache,
-            privacyToolGate,
-            placeholderSubstitutor,
-            toolNamePrefix,
-            perms,
-        )
-        registerTextInputTools(
-            registrar,
-            treeParser,
-            actionExecutor,
-            accessibilityServiceProvider,
-            typeInputController,
-            nodeCache,
-            privacyToolGate,
-            placeholderSubstitutor,
-            toolNamePrefix,
-            perms,
-        )
-        registerUtilityTools(
-            registrar,
-            treeParser,
-            elementFinder,
-            accessibilityServiceProvider,
-            nodeCache,
-            privacyToolGate,
-            placeholderSubstitutor,
-            toolNamePrefix,
-            perms,
-        )
-    }
-
-    private fun registerSharingBundle(
-        registrar: LoggedToolRegistrar,
-        toolNamePrefix: String,
-        perms: ToolPermissionsConfig,
-        fileSizeLimitMb: Int,
-    ) {
-        registerSharingTools(
-            registrar,
-            sharedContentInbox,
-            ephemeralFileLinkService,
-            fileOperationProvider,
-            fileSizeLimitMb,
-            currentBaseUrl,
-            privacyToolGate,
-            toolNamePrefix,
-            perms,
-        )
-    }
-
     override fun onDestroy() {
         screenStateSnapshotCache.clear()
         // Release the Privacy Mode model and clear session-scoped pseudonym/NER caches (never persisted).
@@ -594,23 +363,19 @@ class McpServerService : Service() {
         nerCache.clear()
         Log.i(TAG, "McpServerService destroying")
         updateStatus(ServerStatus.Stopping)
-
         // Second, later attempt to durably commit an explicit stop, in case the first bounded write in
         // onStartCommand timed out. Gated on lastIntentWasStop so an OEM/system kill (last action was a
         // start) never clears the flag — there the flag MUST stay true for restart-if-running.
         if (lastIntentWasStop) {
             persistServerRunning(settingsRepository, false)
         }
-
         // Cancel tunnel status observer before stopping the tunnel
         tunnelObserverJob?.cancel()
         tunnelObserverJob = null
-
         // Cancel the OAuth approval observer and clear any pending approval notification.
         approvalObserverJob?.cancel()
         approvalObserverJob = null
         OAuthApprovalNotifier.cancel(this)
-
         // Stop tunnel first (with ANR-safe timeout).
         // Worst-case blocking time: TUNNEL_STOP_TIMEOUT_MS (3s) + SHUTDOWN_GRACE_PERIOD_MS (1s)
         // + SHUTDOWN_TIMEOUT_MS (5s) = ~9s total. This is well within the Android service
@@ -627,7 +392,6 @@ class McpServerService : Service() {
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping tunnel", e)
         }
-
         // Stop the Ktor server gracefully
         @Suppress("TooGenericExceptionCaught")
         try {
@@ -640,16 +404,12 @@ class McpServerService : Service() {
         }
         mcpServer = null
         serverActive.set(false)
-
         // Cancel coroutine scope
         coroutineScope.cancel()
-
         // Clear singleton
         instance = null
-
         updateStatus(ServerStatus.Stopped)
         Log.i(TAG, "McpServerService destroyed")
-
         super.onDestroy()
     }
 
@@ -668,7 +428,6 @@ class McpServerService : Service() {
                 Intent(this, MainActivity::class.java),
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             )
-
         return NotificationCompat
             .Builder(this, McpApplication.MCP_SERVER_CHANNEL_ID)
             .setContentTitle(getString(R.string.notification_mcp_server_title))

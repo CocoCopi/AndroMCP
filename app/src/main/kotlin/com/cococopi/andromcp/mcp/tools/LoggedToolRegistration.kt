@@ -14,6 +14,24 @@ private const val NANOS_PER_MILLI = 1_000_000L
 private const val FAILED_MARKER = "failed"
 
 /**
+ * One registered tool, captured while it is being added to a [Server].
+ *
+ * The in-app agent calls tools through exactly the same handlers the MCP clients call, which is what
+ * keeps both paths honest: same argument validation, same permission gates, same logging.
+ */
+data class RecordedTool(
+    val name: String,
+    val description: String,
+    val inputSchema: ToolSchema,
+    val handler: suspend (CallToolRequest) -> CallToolResult,
+)
+
+/** Receives every tool that passes the permission gate during one registration pass. */
+fun interface ToolRecorder {
+    fun record(tool: RecordedTool)
+}
+
+/**
  * Wraps a tool handler so every invocation records a TOOL_CALL server-log entry: un-prefixed tool
  * name + duration, plus the constant NON-SENSITIVE [FAILED_MARKER] on failure (isError result or
  * thrown exception). Parameters and free-form error text are NEVER logged (tool errors can echo
@@ -78,6 +96,7 @@ class LoggedToolRegistrar(
     private val serverLog: ServerLogRepository,
     private val toolCallIndicator: ToolCallIndicator = ToolCallIndicator.NONE,
     private val permissions: ToolPermissionsConfig? = null,
+    private val recorder: ToolRecorder? = null,
 ) {
     /** [Server.addTool] with per-call TOOL_CALL logging. [toolName] is the un-prefixed display name. */
     fun addTool(
@@ -89,6 +108,7 @@ class LoggedToolRegistrar(
     ) {
         if (permissions?.isToolEnabled(toolName) == false) return
         val wrapped = loggedToolHandler(serverLog, toolName, toolCallIndicator, handler)
+        recorder?.record(RecordedTool(toolName, description, inputSchema, wrapped))
         server.addTool(name = name, description = description, inputSchema = inputSchema) { request ->
             wrapped(request)
         }
