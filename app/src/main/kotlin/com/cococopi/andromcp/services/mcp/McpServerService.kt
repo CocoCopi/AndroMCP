@@ -470,6 +470,7 @@ class McpServerService : Service() {
                 server,
                 serverLogRepository,
                 toolCallIndicator,
+                perms,
             )
         registerAccessibilityToolBundle(registrar, toolNamePrefix, perms)
         registerFileTools(registrar, storageLocationProvider, fileOperationProvider, toolNamePrefix, perms)

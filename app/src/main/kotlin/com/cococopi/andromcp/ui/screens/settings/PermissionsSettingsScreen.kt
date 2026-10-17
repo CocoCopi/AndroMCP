@@ -200,6 +200,11 @@ fun PermissionsSettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // ---- Device data (messages, contacts, calendar, Bluetooth, special accesses) ----
+            DevicePermissionsSection()
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             // ---- Optional ----
             PermissionSectionHeader(
                 title = stringResource(R.string.permission_section_optional_title),
@@ -261,7 +266,7 @@ internal fun PermissionRow(
 }
 
 @Composable
-private fun PermissionSectionHeader(
+internal fun PermissionSectionHeader(
     title: String,
     subtitle: String,
 ) {

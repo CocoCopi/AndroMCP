@@ -118,6 +118,8 @@
     <string name="permission_section_required_subtitle">Needed for the app to control your device.</string>
     <string name="permission_section_required_if_title">Required if you use a feature</string>
     <string name="permission_section_required_if_subtitle">Grant only the capabilities you plan to use.</string>
+    <string name="permission_section_device_title">Device data</string>
+    <string name="permission_section_device_subtitle">Messages, contacts, calendar, call log, Bluetooth, and system access for the newer tools. Grant only what you use.</string>
     <string name="permission_section_optional_title">Optional</string>
     <string name="permission_section_optional_subtitle">Nice to have; everything works without it.</string>
     <!-- Permissions screen: per-permission rationale (default / foss values) -->
@@ -127,6 +129,22 @@
     <string name="permission_camera_rationale">Take photos and record video.</string>
     <string name="permission_location_rationale">Read GPS position.</string>
     <string name="permission_microphone_rationale">Adds audio to recorded video.</string>
+    <string name="permission_sms">Messages</string>
+    <string name="permission_sms_rationale">Read, search, and send SMS.</string>
+    <string name="permission_contacts">Contacts</string>
+    <string name="permission_contacts_rationale">Search and edit the device address book.</string>
+    <string name="permission_calendar">Calendar</string>
+    <string name="permission_calendar_rationale">Read and create calendar events.</string>
+    <string name="permission_call_log">Call log</string>
+    <string name="permission_call_log_rationale">Read recent calls and missed calls.</string>
+    <string name="permission_bluetooth">Bluetooth</string>
+    <string name="permission_bluetooth_rationale">List paired devices and connect to them.</string>
+    <string name="permission_usage_access">Usage access</string>
+    <string name="permission_usage_access_rationale">App usage stats and screen-time history.</string>
+    <string name="permission_write_settings">Modify system settings</string>
+    <string name="permission_write_settings_rationale">Change brightness, rotation lock, and similar settings.</string>
+    <string name="permission_install_apps">Install apps</string>
+    <string name="permission_install_apps_rationale">Install APKs the agent downloads.</string>
 
     <!-- Permission Warning (main screen: accessibility is the one required permission) -->
     <string name="permission_warning_title">Accessibility permission required</string>

@@ -271,7 +271,7 @@ object McpIntegrationTestHelper {
         perms: ToolPermissionsConfig = ToolPermissionsConfig(),
     ) {
         val toolNamePrefix = McpToolUtils.buildToolNamePrefix(deviceSlug)
-        val registrar = LoggedToolRegistrar(server, deps.serverLog)
+        val registrar = LoggedToolRegistrar(server, deps.serverLog, permissions = perms)
         registerScreenIntrospectionTools(
             registrar,
             deps.treeParser,

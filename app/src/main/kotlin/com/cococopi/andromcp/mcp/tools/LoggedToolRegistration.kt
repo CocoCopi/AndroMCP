@@ -1,6 +1,7 @@
 package com.cococopi.andromcp.mcp.tools
 
 import com.cococopi.andromcp.data.model.ServerLogEntry
+import com.cococopi.andromcp.data.model.ToolPermissionsConfig
 import com.cococopi.andromcp.data.repository.ServerLogRepository
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
@@ -66,11 +67,17 @@ internal fun loggedToolHandler(
  * within detekt's default `LongParameterList` function cap (5): `addTool` below has exactly 5
  * value parameters, and swapping `server` → `registrar` keeps every `registerXxxTools` function
  * at its current parameter count.
+ *
+ * [permissions] is the single enable/disable gate for the whole tool surface. Bundles that predate
+ * the central gate also check it themselves; checking here as well keeps the newer bundles — which
+ * pass the config straight through — behaving identically, so a tool the user turned off is never
+ * advertised to a client and never callable.
  */
 class LoggedToolRegistrar(
     private val server: Server,
     private val serverLog: ServerLogRepository,
     private val toolCallIndicator: ToolCallIndicator = ToolCallIndicator.NONE,
+    private val permissions: ToolPermissionsConfig? = null,
 ) {
     /** [Server.addTool] with per-call TOOL_CALL logging. [toolName] is the un-prefixed display name. */
     fun addTool(
@@ -80,6 +87,7 @@ class LoggedToolRegistrar(
         inputSchema: ToolSchema,
         handler: suspend (CallToolRequest) -> CallToolResult,
     ) {
+        if (permissions?.isToolEnabled(toolName) == false) return
         val wrapped = loggedToolHandler(serverLog, toolName, toolCallIndicator, handler)
         server.addTool(name = name, description = description, inputSchema = inputSchema) { request ->
             wrapped(request)
