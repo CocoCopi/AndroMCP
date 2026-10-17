@@ -88,25 +88,7 @@ class AnthropicClient(
                     }
 
                     is AgentMessage.Assistant -> {
-                        addJsonObject {
-                            put("role", "assistant")
-                            putJsonArray("content") {
-                                if (message.text.isNotBlank()) {
-                                    addJsonObject {
-                                        put("type", TEXT_TYPE)
-                                        put("text", message.text)
-                                    }
-                                }
-                                message.toolCalls.forEach { call ->
-                                    addJsonObject {
-                                        put("type", TOOL_USE_TYPE)
-                                        put("id", call.id)
-                                        put("name", call.name)
-                                        put("input", call.arguments)
-                                    }
-                                }
-                            }
-                        }
+                        add(assistantMessage(message))
                         index++
                     }
 
@@ -131,15 +113,32 @@ class AnthropicClient(
             }
         }
 
-    private fun parse(raw: String): AgentCompletion {
-        val root = LlmJson.parseObject(raw) ?: throw LlmException("Anthropic returned a non-JSON response")
-        root.objectOrNull("error")?.let { error ->
-            throw LlmException(error.stringOrNull("message") ?: "Anthropic returned an error")
+    /** Anthropic wants prose first, then one `tool_use` block per call. */
+    private fun assistantMessage(message: AgentMessage.Assistant): JsonObject =
+        buildJsonObject {
+            put("role", "assistant")
+            putJsonArray("content") {
+                if (message.text.isNotBlank()) {
+                    addJsonObject {
+                        put("type", TEXT_TYPE)
+                        put("text", message.text)
+                    }
+                }
+                message.toolCalls.forEach { call ->
+                    addJsonObject {
+                        put("type", TOOL_USE_TYPE)
+                        put("id", call.id)
+                        put("name", call.name)
+                        put("input", call.arguments)
+                    }
+                }
+            }
         }
 
-        val blocks =
-            root.arrayOrNull("content")
-                ?: throw LlmException("Anthropic returned no content blocks")
+    private fun parse(raw: String): AgentCompletion {
+        val root = LlmJson.requireObject(raw, PROVIDER)
+        LlmJson.requireNoError(root, PROVIDER)
+        val blocks = root.arrayOrNull("content") ?: throw LlmException("Anthropic returned no content blocks")
 
         val text = StringBuilder()
         val calls = mutableListOf<AgentToolCall>()
@@ -166,6 +165,7 @@ class AnthropicClient(
     }
 
     companion object {
+        private const val PROVIDER = "Anthropic"
         private const val MESSAGES_PATH = "messages"
         private const val ANTHROPIC_VERSION = "2023-06-01"
         private const val TEXT_TYPE = "text"

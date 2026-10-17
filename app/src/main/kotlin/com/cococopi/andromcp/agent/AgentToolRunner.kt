@@ -1,5 +1,10 @@
 package com.cococopi.andromcp.agent
 
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+
+private const val HTTP_METHOD_FIELD = "method"
+
 /**
  * Everything the agent needs from the device: the tools it may call and the call itself.
  *
@@ -52,18 +57,25 @@ object RiskyToolPolicy {
     /** Call prefixes that are always destructive or shell-level, whatever the tool name. */
     private val RISKY_PREFIXES = listOf("delete_", "shell_", "su_", "terminal_")
 
+    private const val HTTP_TOOL = "http_request"
+
     /** True when [toolName] must be confirmed by the user before it runs. */
     fun isRisky(
         toolName: String,
-        arguments: kotlinx.serialization.json.JsonObject,
-    ): Boolean {
-        if (toolName in RISKY_TOOLS) return true
-        if (RISKY_PREFIXES.any { toolName.startsWith(it) }) return true
-        // HTTP writes can exfiltrate data or trigger side effects; reads are unrestricted.
-        if (toolName == "http_request") {
-            val method = arguments["method"]?.toString()?.trim('"')?.uppercase()
-            return method != null && method != "GET" && method != "HEAD"
-        }
-        return false
+        arguments: JsonObject,
+    ): Boolean =
+        toolName in RISKY_TOOLS ||
+            RISKY_PREFIXES.any { toolName.startsWith(it) } ||
+            (toolName == HTTP_TOOL && isWritingHttpCall(arguments))
+
+    /**
+     * HTTP writes can exfiltrate data or trigger side effects; reads (GET/HEAD) are unrestricted. An
+     * absent or unparseable method counts as writing, so an unexpected shape fails safe.
+     */
+    private fun isWritingHttpCall(arguments: JsonObject): Boolean {
+        val method =
+            (arguments[HTTP_METHOD_FIELD] as? JsonPrimitive)?.content?.uppercase()
+                ?: return true
+        return method != "GET" && method != "HEAD"
     }
 }

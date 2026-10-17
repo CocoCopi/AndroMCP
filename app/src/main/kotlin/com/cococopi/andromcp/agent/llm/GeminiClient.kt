@@ -132,10 +132,8 @@ class GeminiClient(
         }
 
     private fun parse(raw: String): AgentCompletion {
-        val root = LlmJson.parseObject(raw) ?: throw LlmException("Gemini returned a non-JSON response")
-        root.objectOrNull("error")?.let { error ->
-            throw LlmException(error.stringOrNull("message") ?: "Gemini returned an error")
-        }
+        val root = LlmJson.requireObject(raw, PROVIDER)
+        LlmJson.requireNoError(root, PROVIDER)
 
         val candidate =
             root.objectsOrEmpty("candidates").firstOrNull()
@@ -162,6 +160,7 @@ class GeminiClient(
     }
 
     companion object {
+        private const val PROVIDER = "Gemini"
         private const val GENERATE_PATH = "generateContent"
         private const val USER_ROLE = "user"
         private const val MODEL_ROLE = "model"

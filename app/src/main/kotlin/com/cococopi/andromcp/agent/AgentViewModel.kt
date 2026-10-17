@@ -179,7 +179,8 @@ class AgentViewModel
 
                 is AgentEvent.ToolCompleted -> {
                     results += AgentMessage.ToolResult(event.call.id, event.call.name, event.output, event.isError)
-                    replaceLastStep(event.call.name, event.output, if (event.isError) ToolStepState.ERROR else ToolStepState.OK)
+                    val state = if (event.isError) ToolStepState.ERROR else ToolStepState.OK
+                    replaceLastStep(event.call.name, event.output, state)
                 }
 
                 is AgentEvent.ToolDenied -> {
@@ -253,20 +254,22 @@ class AgentViewModel
             }
         }
 
-        /** The single agent this build runs with, still wrapped in grant enforcement. */
-        private fun executiveAssistant(): AgentProfile =
-            AgentProfile(
-                id = EXECUTIVE_ASSISTANT_ID,
-                name = "Assistant",
-                role = "Executive Assistant",
-                grantedTools = setOf(AgentProfile.ALL_GRANTS),
-            )
-
-        private fun deviceSummary(): String = "${Build.MANUFACTURER} ${Build.MODEL}, Android ${Build.VERSION.RELEASE}"
-
         private companion object {
-            const val EXECUTIVE_ASSISTANT_ID = "ea"
             const val MAX_TRANSCRIPT_MESSAGES = 40
             const val MAX_STEP_DETAIL_CHARS = 160
         }
     }
+
+/** The single agent this build runs with, still wrapped in grant enforcement. */
+private fun executiveAssistant(): AgentProfile =
+    AgentProfile(
+        id = EXECUTIVE_ASSISTANT_ID,
+        name = "Assistant",
+        role = "Executive Assistant",
+        grantedTools = setOf(AgentProfile.ALL_GRANTS),
+    )
+
+/** One line describing the phone, passed to the model as context. */
+private fun deviceSummary(): String = "${Build.MANUFACTURER} ${Build.MODEL}, Android ${Build.VERSION.RELEASE}"
+
+private const val EXECUTIVE_ASSISTANT_ID = "ea"

@@ -25,7 +25,10 @@ class AgentDirectory(
     fun find(id: String): AgentProfile? = byId[id]
 
     /** Case-insensitive `@name` lookup used by chat mentions. */
-    fun findByName(name: String): AgentProfile? = byId.values.firstOrNull { it.name.equals(name.removePrefix("@"), ignoreCase = true) }
+    fun findByName(name: String): AgentProfile? {
+        val wanted = name.removePrefix("@")
+        return byId.values.firstOrNull { it.name.equals(wanted, ignoreCase = true) }
+    }
 
     /** The single managerless agent, or null when the chart is invalid. */
     fun executiveAssistant(): AgentProfile? = byManager[null]?.singleOrNull()
@@ -74,9 +77,10 @@ class AgentDirectory(
         actorId: String,
         targetId: String,
     ): Boolean {
-        if (actorId == targetId) return true
-        val actor = byId[actorId] ?: return false
-        return actor.isExecutiveAssistant || reportsOf(actorId).any { it.id == targetId }
+        val actor = byId[actorId]
+        return actorId == targetId ||
+            actor?.isExecutiveAssistant == true ||
+            (actor != null && reportsOf(actorId).any { it.id == targetId })
     }
 
     /** Whether [actorId] may escalate a question to [targetId] (only the direct manager). */
@@ -93,70 +97,80 @@ class AgentDirectory(
         actorId: String,
         toolName: String,
     ): Boolean {
-        val actor = byId[actorId] ?: return false
-        if (actor.hasAllGrants) return true
-        return toolName in actor.grantedTools
+        val actor = byId[actorId]
+        return actor != null && (actor.hasAllGrants || toolName in actor.grantedTools)
     }
 
-    /** Whether every tool in [toolNames] may be granted by [actorId]. */
-    fun canGrantAll(
-        actorId: String,
-        toolNames: Set<String>,
-    ): Boolean = toolNames.all { canGrant(actorId, it) }
-
-    /**
-     * Structural problems with the stored chart, as human-readable sentences. Empty means valid.
-     * Duplicate ids collapse in [byId], so they are detected from the raw count instead.
-     */
-    fun validate(): List<String> {
-        val problems = mutableListOf<String>()
-
-        val roots = byManager[null].orEmpty()
-        when {
-            roots.isEmpty() -> {
-                problems += "No Executive Assistant: exactly one agent must have no manager."
-            }
-
-            roots.size > 1 -> {
-                problems += "More than one agent has no manager (${roots.joinToString { it.name }}); " +
-                    "only the Executive Assistant may be root."
-            }
-        }
-
-        byId.values
-            .groupBy { it.name.lowercase() }
-            .filterValues { it.size > 1 }
-            .forEach { (name, agents) ->
-                problems += "Two agents share the name '$name' (${agents.joinToString { it.id }}); " +
-                    "@mentions would be ambiguous."
-            }
-
-        byId.values.forEach { agent ->
-            val managerId = agent.managerId
-            if (managerId != null && byId[managerId] == null) {
-                problems += "'${agent.name}' reports to unknown manager '$managerId'."
-            }
-            val depth = depthOf(agent.id)
-            if (depth > AgentProfile.MAX_DEPTH_BELOW_EA) {
-                problems += "'${agent.name}' sits $depth levels below the EA, past the " +
-                    "${AgentProfile.MAX_DEPTH_BELOW_EA}-level limit."
-            }
-        }
-
-        val ea = executiveAssistant()
-        if (ea != null) {
-            val reachable = (listOf(ea) + descendantsOf(ea.id)).map { it.id }.toSet()
-            val stranded = byId.values.filter { it.id !in reachable }
-            if (stranded.isNotEmpty()) {
-                problems += "Unreachable from the Executive Assistant (cycle or orphan): " +
-                    stranded.joinToString { it.name } + "."
-            }
-        }
-
-        return problems
-    }
+    /** The stored list, including any duplicate ids that [all] would collapse. */
+    internal val storedProfiles: List<AgentProfile> get() = byManager.values.flatten()
 
     companion object {
         private const val UNKNOWN_DEPTH = -1
     }
+}
+
+/** Whether every tool in [toolNames] may be granted by [actorId]. */
+fun AgentDirectory.canGrantAll(
+    actorId: String,
+    toolNames: Set<String>,
+): Boolean = toolNames.all { canGrant(actorId, it) }
+
+/**
+ * Structural problems with the stored chart, as human-readable sentences. Empty means valid.
+ *
+ * An extension so the class stays inside detekt's function budget; it needs only the public chart
+ * API plus [AgentDirectory.storedProfiles], which is what lets duplicate ids be detected even though
+ * [AgentDirectory.all] collapses them.
+ */
+fun AgentDirectory.validate(): List<String> {
+    val problems = mutableListOf<String>()
+    val profiles = storedProfiles
+
+    if (profiles.size != all().size) {
+        problems += "Two agents share an id; ids must be unique."
+    }
+
+    val roots = profiles.filter { it.managerId == null }
+    when {
+        roots.isEmpty() -> {
+            problems += "No Executive Assistant: exactly one agent must have no manager."
+        }
+
+        roots.size > 1 -> {
+            problems += "More than one agent has no manager (${roots.joinToString { it.name }}); " +
+                "only the Executive Assistant may be root."
+        }
+    }
+
+    profiles
+        .groupBy { it.name.lowercase() }
+        .filterValues { it.size > 1 }
+        .forEach { (name, agents) ->
+            problems += "Two agents share the name '$name' (${agents.joinToString { it.id }}); " +
+                "@mentions would be ambiguous."
+        }
+
+    profiles.forEach { agent ->
+        val managerId = agent.managerId
+        if (managerId != null && find(managerId) == null) {
+            problems += "'${agent.name}' reports to unknown manager '$managerId'."
+        }
+        val depth = depthOf(agent.id)
+        if (depth > AgentProfile.MAX_DEPTH_BELOW_EA) {
+            problems += "'${agent.name}' sits $depth levels below the EA, past the " +
+                "${AgentProfile.MAX_DEPTH_BELOW_EA}-level limit."
+        }
+    }
+
+    val executive = executiveAssistant()
+    if (executive != null) {
+        val reachable = (listOf(executive) + descendantsOf(executive.id)).map { it.id }.toSet()
+        val stranded = profiles.filter { it.id !in reachable }
+        if (stranded.isNotEmpty()) {
+            problems += "Unreachable from the Executive Assistant (cycle or orphan): " +
+                stranded.joinToString { it.name } + "."
+        }
+    }
+
+    return problems
 }

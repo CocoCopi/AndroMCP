@@ -23,7 +23,10 @@ object RuntimeToolAccess {
     fun effectivePermissions(
         context: Context,
         config: ServerConfig,
-    ): ToolPermissionsConfig = OptionalToolPermissions.effectivePermissions(config.toolPermissionsConfig, granted(context))
+    ): ToolPermissionsConfig {
+        val stored = config.toolPermissionsConfig
+        return OptionalToolPermissions.effectivePermissions(stored, granted(context))
+    }
 
     /** The optional permissions currently granted to this app. */
     fun granted(context: Context): Set<OptionalToolPermission> =

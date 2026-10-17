@@ -112,10 +112,8 @@ class OpenAiCompatibleClient(
         }
 
     private fun parse(raw: String): AgentCompletion {
-        val root = LlmJson.parseObject(raw) ?: throw LlmException("The provider returned a non-JSON response")
-        root.objectOrNull("error")?.let { error ->
-            throw LlmException(error.stringOrNull("message") ?: "The provider returned an error")
-        }
+        val root = LlmJson.requireObject(raw, PROVIDER)
+        LlmJson.requireNoError(root, PROVIDER)
 
         val choice =
             root.objectsOrEmpty("choices").firstOrNull()
@@ -139,6 +137,7 @@ class OpenAiCompatibleClient(
     }
 
     companion object {
+        private const val PROVIDER = "The provider"
         private const val CHAT_PATH = "chat/completions"
         private const val FUNCTION_TYPE = "function"
         private const val MAX_OUTPUT_TOKENS = 4_096

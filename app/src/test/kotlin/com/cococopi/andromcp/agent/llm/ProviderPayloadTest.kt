@@ -37,7 +37,8 @@ class ProviderPayloadTest {
                     LlmConfig(ModelProvider.OPENAI, apiKey = "sk-test"),
                     transport,
                 )
-            val result = client.complete(listOf(AgentMessage.System("be brief"), AgentMessage.User("tap")), listOf(tapTool))
+            val history = listOf(AgentMessage.System("be brief"), AgentMessage.User("tap"))
+            val result = client.complete(history, listOf(tapTool))
 
             assertEquals("https://api.openai.com/v1/chat/completions", transport.url)
             assertEquals("Bearer sk-test", transport.headers["Authorization"])
@@ -142,7 +143,8 @@ class ProviderPayloadTest {
                     LlmConfig(ModelProvider.GEMINI, apiKey = "AIza-test"),
                     transport,
                 )
-            val result = client.complete(listOf(AgentMessage.System("rules"), AgentMessage.User("tap")), listOf(tapTool))
+            val history = listOf(AgentMessage.System("rules"), AgentMessage.User("tap"))
+            val result = client.complete(history, listOf(tapTool))
 
             assertEquals(
                 "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent" +

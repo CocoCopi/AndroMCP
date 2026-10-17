@@ -15,15 +15,7 @@ object LlmClientFactory {
         config: LlmConfig,
         transport: HttpTransport = UrlConnectionTransport(),
     ): LlmClient {
-        if (config.effectiveBaseUrl.isBlank()) {
-            throw LlmException("Set an endpoint URL for ${config.provider.displayName}")
-        }
-        if (config.effectiveModel.isBlank()) {
-            throw LlmException("Set a model id for ${config.provider.displayName}")
-        }
-        if (config.provider.requiresApiKey && config.apiKey.isBlank()) {
-            throw LlmException("Add your ${config.provider.displayName} API key")
-        }
+        config.problem()?.let { problem -> throw LlmException(problem) }
 
         return when (config.provider.apiStyle) {
             ApiStyle.OPENAI -> OpenAiCompatibleClient(config, transport, openAiExtras(config.provider))
@@ -31,6 +23,15 @@ object LlmClientFactory {
             ApiStyle.GEMINI -> GeminiClient(config, transport)
         }
     }
+
+    /** What is missing from [config], or null when it is usable as it stands. */
+    private fun LlmConfig.problem(): String? =
+        when {
+            effectiveBaseUrl.isBlank() -> "Set an endpoint URL for ${provider.displayName}"
+            effectiveModel.isBlank() -> "Set a model id for ${provider.displayName}"
+            provider.requiresApiKey && apiKey.isBlank() -> "Add your ${provider.displayName} API key"
+            else -> null
+        }
 
     /**
      * OpenRouter attributes traffic by referer/title; sending them keeps the app on the free tier's

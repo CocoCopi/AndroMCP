@@ -59,14 +59,24 @@ internal fun DevicePermissionsSection() {
             refreshToken++
         }
 
-    val groups = remember(refreshToken) { runtimePermissionGroups() }
-
     PermissionSectionHeader(
         title = stringResource(R.string.permission_section_device_title),
         subtitle = stringResource(R.string.permission_section_device_subtitle),
     )
 
-    groups.forEach { group ->
+    RuntimePermissionGroupRows(refreshToken = refreshToken, onRequest = permissionLauncher::launch)
+    SpecialAccessRows(refreshToken = refreshToken)
+}
+
+/** One row per runtime permission group (messages, contacts, calendar, call log, Bluetooth). */
+@Composable
+private fun RuntimePermissionGroupRows(
+    refreshToken: Int,
+    onRequest: (Array<String>) -> Unit,
+) {
+    val context = LocalContext.current
+
+    remember(refreshToken) { runtimePermissionGroups() }.forEach { group ->
         val granted = group.permissions.isEmpty() || group.permissions.all { context.isGranted(it) }
         PermissionRow(
             label = stringResource(group.labelRes),
@@ -84,13 +94,19 @@ internal fun DevicePermissionsSection() {
                 if (group.permissions.isEmpty()) {
                     context.openAppDetails()
                 } else {
-                    permissionLauncher.launch(group.permissions.toTypedArray())
+                    onRequest(group.permissions.toTypedArray())
                 }
             },
             actionEnabled = !granted,
         )
         Spacer(modifier = Modifier.height(8.dp))
     }
+}
+
+/** One row per special access, each granted on its own OS screen instead of a dialog. */
+@Composable
+private fun SpecialAccessRows(refreshToken: Int) {
+    val context = LocalContext.current
 
     specialAccesses().forEach { access ->
         val granted = remember(refreshToken) { access.isGranted(context) }

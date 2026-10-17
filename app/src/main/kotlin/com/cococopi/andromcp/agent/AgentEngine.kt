@@ -44,8 +44,6 @@ class AgentEngine(
                     } catch (e: LlmException) {
                         emit(AgentEvent.Failed(e.message ?: DEFAULT_FAILURE_MESSAGE))
                         return@flow
-                    } catch (e: CancellationException) {
-                        throw e
                     }
 
                 if (completion.text.isNotBlank()) emit(AgentEvent.Text(completion.text))
@@ -82,11 +80,11 @@ class AgentEngine(
         val outcome =
             try {
                 tools.call(call)
-            } catch (e: CancellationException) {
-                throw e
             } catch (
                 @Suppress("TooGenericExceptionCaught") e: Exception,
             ) {
+                // A cancelled turn must stay cancelled; everything else becomes a result the model can read.
+                if (e is CancellationException) throw e
                 ToolCallOutcome(text = "Tool crashed: ${e.message ?: "unknown error"}", isError = true)
             }
 

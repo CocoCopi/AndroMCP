@@ -40,11 +40,12 @@ class DeviceToolRunnerTest {
     @Test
     fun `tool text is handed back and errors are flagged`() =
         runTest {
+            val failing = CallToolResult(content = listOf(TextContent(text = "nope")), isError = true)
             val runner =
                 DeviceToolRunner {
                     mapOf(
                         "ok_tool" to tool("ok_tool") { ok("done") },
-                        "bad_tool" to tool("bad_tool") { CallToolResult(content = listOf(TextContent(text = "nope")), isError = true) },
+                        "bad_tool" to tool("bad_tool") { failing },
                     )
                 }
 
