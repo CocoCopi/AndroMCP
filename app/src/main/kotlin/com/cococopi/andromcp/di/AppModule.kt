@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.cococopi.andromcp.agent.AgentSettingsRepository
+import com.cococopi.andromcp.agent.AgentSettingsRepositoryImpl
 import com.cococopi.andromcp.data.repository.EventChannelSettings
 import com.cococopi.andromcp.data.repository.EventChannelSettingsImpl
 import com.cococopi.andromcp.data.repository.OAuthClientRepository
@@ -190,6 +192,11 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindServerLogRepository(impl: ServerLogRepositoryImpl): ServerLogRepository
+
+    /** Binds the in-app agent's provider settings (encrypted key included). */
+    @Binds
+    @Singleton
+    abstract fun bindAgentSettingsRepository(impl: AgentSettingsRepositoryImpl): AgentSettingsRepository
 }
 
 @Suppress("TooManyFunctions")
